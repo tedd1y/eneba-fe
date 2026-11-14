@@ -49,7 +49,7 @@ const categories = [
   { icon: CrosshairIcon, label: 'FPS / TPS', count: 2820 },
 ]
 
-export function HomePage() {
+export function Home() {
   return (
     <div>
       <Header />

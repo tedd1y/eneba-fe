@@ -63,6 +63,13 @@
   --region-eu: #23c299; /* region label: Europe */
   --region-alt: #e76a8c; /* region label: other / highlighted region */
   --discount: #e76a8c;
+  --attention: #fad318; /* store: filter counts, active page, "Clear all", checked boxes */
+  --attention-foreground: #1f0a4d;
+
+  /* Store filters */
+  --field: #461da3; /* filter inputs, selects, search boxes */
+  --chip: #2c0e6c; /* active filter badges ("Type (1)") */
+  --control: #cdbef0; /* checkbox outline */
 
   /* Lines & states */
   --border: rgb(255 255 255 / 12%);
@@ -130,6 +137,11 @@
   --color-region-eu: var(--region-eu);
   --color-region-alt: var(--region-alt);
   --color-discount: var(--discount);
+  --color-attention: var(--attention);
+  --color-attention-foreground: var(--attention-foreground);
+  --color-field: var(--field);
+  --color-chip: var(--chip);
+  --color-control: var(--control);
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
   --color-input: var(--input);

@@ -24,6 +24,10 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-foreground hover:bg-destructive/85 focus-visible:ring-destructive/40",
         link: "font-medium text-foreground underline underline-offset-4 hover:text-highlight",
+        /** Dark pill — active store filters ("Type (1) ⌄"). */
+        chip: "rounded-full bg-chip font-semibold text-foreground hover:bg-chip/70 aria-expanded:bg-chip/70",
+        /** Gold text action — "Clear all", "22 more". */
+        attention: "font-semibold text-attention hover:underline underline-offset-4",
       },
       size: {
         default:
@@ -31,6 +35,8 @@ const buttonVariants = cva(
         xs: "h-7 gap-1 px-2.5 type-caption [&_svg:not([class*='size-'])]:size-3.5",
         sm: "h-8 gap-1.5 px-4 type-label [&_svg:not([class*='size-'])]:size-4",
         lg: "h-12 gap-2 px-10 type-nav has-data-[icon=inline-end]:pr-8 has-data-[icon=inline-start]:pl-8",
+        /** Bare inline text button, no box. */
+        text: "h-auto gap-1 p-0 type-label",
         wide: "h-10 w-full max-w-56 gap-2 px-6 type-body",
         icon: "size-10",
         "icon-xs": "size-7 [&_svg:not([class*='size-'])]:size-3.5",

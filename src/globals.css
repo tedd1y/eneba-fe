@@ -47,7 +47,8 @@
   --primary-hover: #5a24ff;
   --secondary: transparent; /* white-outline buttons ("See all", "Load more") */
   --secondary-foreground: #ffffff;
-  --secondary-hover: rgb(255 255 255 / 10%);
+  --secondary-hover: rgb(0 0 0 / 40%); /* darkens whatever surface the outline button sits on */
+  --ghost-hover: #1f0a4d; /* ghost button hover fill (text turns --attention) */
 
   /* Text */
   --muted: #301078;
@@ -126,6 +127,7 @@
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary-hover: var(--secondary-hover);
+  --color-ghost-hover: var(--ghost-hover);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-placeholder: var(--placeholder);

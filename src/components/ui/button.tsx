@@ -10,17 +10,17 @@ const buttonVariants = cva(
         /** Solid electric violet — hero CTAs ("Shop cards"). */
         default:
           "bg-primary text-primary-foreground uppercase hover:bg-primary-hover",
-        /** White outline on purple — "See all", "Load more", "Subscribe". */
+        /** White outline, gold border + darkened fill on hover — "See all", "Load more", "Subscribe". */
         secondary:
-          "border-border-strong bg-secondary text-secondary-foreground hover:bg-secondary-hover aria-expanded:bg-secondary-hover",
+          "border-border-strong bg-secondary text-secondary-foreground hover:border-attention hover:bg-secondary-hover aria-expanded:border-attention aria-expanded:bg-secondary-hover",
         outline:
-          "border-border-strong bg-secondary text-secondary-foreground hover:bg-secondary-hover aria-expanded:bg-secondary-hover",
+          "border-border-strong bg-secondary text-secondary-foreground hover:border-attention hover:bg-secondary-hover aria-expanded:border-attention aria-expanded:bg-secondary-hover",
         /** Mint accent — cashback / wallet actions. */
         highlight:
           "bg-highlight text-highlight-foreground hover:bg-highlight/85",
-        /** Icon-only header actions, menu rows. */
+        /** Header links, menu rows: gold text on a deep fill. Icon-only sizes get the gold, no fill. */
         ghost:
-          "font-medium text-foreground hover:bg-secondary-hover aria-expanded:bg-secondary-hover",
+          "font-medium text-foreground hover:bg-ghost-hover hover:text-attention aria-expanded:bg-ghost-hover aria-expanded:text-attention",
         destructive:
           "bg-destructive text-foreground hover:bg-destructive/85 focus-visible:ring-destructive/40",
         link: "font-medium text-foreground underline underline-offset-4 hover:text-highlight",
@@ -44,6 +44,13 @@ const buttonVariants = cva(
         "icon-lg": "size-12 [&_svg:not([class*='size-'])]:size-6",
       },
     },
+    compoundVariants: [
+      {
+        variant: "ghost",
+        size: ["icon", "icon-xs", "icon-sm", "icon-lg"],
+        className: "hover:bg-transparent aria-expanded:bg-transparent",
+      },
+    ],
     defaultVariants: {
       variant: "default",
       size: "default",

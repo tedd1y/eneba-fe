@@ -10,10 +10,10 @@ function QuickLink({ icon: Icon, label }: QuickLinkItem) {
   return (
     <a
       href="#"
-      className="flex w-24 shrink-0 flex-col items-center gap-2 py-2 type-label text-foreground transition-colors hover:text-highlight"
+      className="flex h-quick-link-h w-quick-link-w shrink-0 flex-col items-center justify-center gap-0.5 px-1 text-center type-quick-link text-foreground transition-colors hover:text-attention"
     >
       <Icon className="size-8" aria-hidden />
-      {label}
+      <span className="w-full truncate">{label}</span>
     </a>
   )
 }
@@ -26,7 +26,7 @@ function QuickLinkStrip({ items }: { items: QuickLinkItem[] }) {
         <ChevronLeftIcon />
       </Button>
       <ScrollArea className="min-w-0 flex-1">
-        <div className="flex justify-between gap-2 pb-3">
+        <div className="flex pb-3">
           {items.map(item => (
             <QuickLink key={item.label} {...item} />
           ))}

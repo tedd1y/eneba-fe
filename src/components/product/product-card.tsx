@@ -26,7 +26,8 @@ export type Product = {
   cover: string
 }
 
-function Cover({
+/** Cashback tag + platform strip that sit on the bottom edge of the cover. */
+function CoverBadges({
   product,
   showCashback = true,
   className,
@@ -36,15 +37,31 @@ function Cover({
   className?: string
 }) {
   return (
-    <div className={cn("relative overflow-hidden", product.cover, className)}>
-      {showCashback && product.cashback && (
-        <Badge variant="cashback" className="absolute bottom-8 left-0">
-          Cashback
-        </Badge>
-      )}
-      <Badge variant="platform" className="absolute inset-x-0 bottom-0 h-8 w-full">
+    <div className={cn("pointer-events-none flex flex-col items-start", className)}>
+      {showCashback && product.cashback && <Badge variant="cashback">Cashback</Badge>}
+      <Badge variant="platform" className="h-8 w-full">
         {product.platform}
       </Badge>
+    </div>
+  )
+}
+
+function Cover({
+  product,
+  showBadges = true,
+  showCashback = true,
+  className,
+}: {
+  product: Product
+  showBadges?: boolean
+  showCashback?: boolean
+  className?: string
+}) {
+  return (
+    <div className={cn("relative overflow-hidden", product.cover, className)}>
+      {showBadges && (
+        <CoverBadges product={product} showCashback={showCashback} className="absolute inset-x-0 bottom-0" />
+      )}
     </div>
   )
 }
@@ -85,18 +102,48 @@ function PriceBlock({ product }: { product: Product }) {
   )
 }
 
-/** Vertical card used in desktop/tablet rails. */
-function ProductCard({ product, className }: { product: Product; className?: string }) {
+/**
+ * Vertical card used in desktop/tablet rails.
+ * On hover (or when a button inside has focus) the lower part slides up over the cover
+ * and reveals "Add to cart" / "View offers". Labels and handlers come in as props.
+ */
+function ProductCard({
+  product,
+  className,
+  addToCartLabel = "Add to cart",
+  viewOffersLabel = "View offers",
+  onAddToCart,
+  offersHref = "#",
+}: {
+  product: Product
+  className?: string
+  addToCartLabel?: string
+  viewOffersLabel?: string
+  onAddToCart?: (product: Product) => void
+  offersHref?: string
+}) {
   return (
-    <Card className={cn("h-full gap-2 pt-0", className)}>
-      <Cover product={product} className="aspect-[3/4]" />
-      <CardHeader className="pt-2">
-        <CardTitle className="line-clamp-2">{product.title}</CardTitle>
-        <Region product={product} />
-      </CardHeader>
-      <CardFooter className="mt-auto pt-0">
-        <PriceBlock product={product} />
-      </CardFooter>
+    <Card className={cn("h-full gap-0 py-0", className)}>
+      <Cover product={product} showBadges={false} className="aspect-[3/4]" />
+      <div className="relative flex flex-1 flex-col gap-2 bg-card pt-2 pb-4 transition-transform duration-300 ease-out group-hover/card:-translate-y-card-actions group-focus-within/card:-translate-y-card-actions motion-reduce:transition-none">
+        {/* Badges ride on top of the sliding panel so they stay visible on hover. */}
+        <CoverBadges product={product} className="absolute inset-x-0 bottom-full" />
+        <CardHeader>
+          <CardTitle className="line-clamp-2">{product.title}</CardTitle>
+          <Region product={product} />
+        </CardHeader>
+        <CardFooter className="mt-auto">
+          <PriceBlock product={product} />
+        </CardFooter>
+        <div className="absolute inset-x-0 top-full flex h-card-actions flex-col gap-2 bg-card px-(--card-spacing)">
+          <Button variant="buy" className="w-full" onClick={() => onAddToCart?.(product)}>
+            {addToCartLabel}
+          </Button>
+          <Button variant="secondary" className="w-full" nativeButton={false} render={<a href={offersHref} />}>
+            {viewOffersLabel}
+          </Button>
+        </div>
+      </div>
     </Card>
   )
 }

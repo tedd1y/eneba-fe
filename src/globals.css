@@ -195,6 +195,13 @@
   --spacing-block: 2rem;        /* 32px — phone vertical padding */
   --spacing-block-lg: 3.75rem;  /* 60px — desktop vertical padding */
   --spacing-block-gap: 2rem;    /* 32px — title → content → action */
+
+  /* Quick-category strip tile → w-quick-link-w h-quick-link-h */
+  --spacing-quick-link-w: 6.25rem; /* 100px */
+  --spacing-quick-link-h: 3.75rem; /* 60px */
+
+  /* Product card hover: height of the revealed button stack (2 × 40px + 8px gap + 16px bottom) */
+  --spacing-card-actions: 6.5rem; /* 104px → -translate-y-card-actions */
 }
 
 /*
@@ -251,6 +258,12 @@
   font-size: 0.8125rem;
   font-weight: 600;
   line-height: 1.35;
+}
+@utility type-quick-link {
+  /* Quick-category strip labels */
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 1.2rem;
 }
 @utility type-caption {
   font-size: 0.75rem;

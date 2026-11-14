@@ -3,7 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-md border border-transparent bg-clip-padding font-bold whitespace-nowrap transition-colors outline-none select-none focus-visible:ring-3 focus-visible:ring-ring active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
+  "group/button inline-flex shrink-0 items-center justify-center rounded-md border border-transparent bg-clip-padding font-bold whitespace-nowrap transition-colors outline-none select-none active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
   {
     variants: {
       variant: {
@@ -15,6 +15,8 @@ const buttonVariants = cva(
           "border-border-strong bg-secondary text-secondary-foreground hover:border-attention hover:bg-secondary-hover aria-expanded:border-attention aria-expanded:bg-secondary-hover",
         outline:
           "border-border-strong bg-secondary text-secondary-foreground hover:border-attention hover:bg-secondary-hover aria-expanded:border-attention aria-expanded:bg-secondary-hover",
+        /** Solid gold — purchase actions ("Add to cart"). */
+        buy: "bg-attention text-attention-foreground hover:bg-attention/85",
         /** Mint accent — cashback / wallet actions. */
         highlight:
           "bg-highlight text-highlight-foreground hover:bg-highlight/85",
@@ -22,7 +24,7 @@ const buttonVariants = cva(
         ghost:
           "font-medium text-foreground hover:bg-ghost-hover hover:text-attention aria-expanded:bg-ghost-hover aria-expanded:text-attention",
         destructive:
-          "bg-destructive text-foreground hover:bg-destructive/85 focus-visible:ring-destructive/40",
+          "bg-destructive text-foreground hover:bg-destructive/85",
         link: "font-medium text-foreground underline underline-offset-4 hover:text-highlight",
         /** Dark pill — active store filters ("Type (1) ⌄"). */
         chip: "rounded-full bg-chip font-semibold text-foreground hover:bg-chip/70 aria-expanded:bg-chip/70",

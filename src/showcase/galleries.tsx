@@ -1,6 +1,4 @@
 import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
   CreditCardIcon,
   DollarSignIcon,
   Gamepad2Icon,
@@ -11,16 +9,16 @@ import {
   TvIcon,
 } from "lucide-react"
 
+import { Block } from "@/components/layout/block"
 import { HeroGallery, PromoBanner } from "@/components/product/hero-gallery"
 import { ProductCard } from "@/components/product/product-card"
 import { ProductRail } from "@/components/product/product-rail"
-import { QuickLink } from "@/components/product/quick-link"
+import { QuickLinkStrip, type QuickLinkItem } from "@/components/product/quick-link"
 import { Button } from "@/components/ui/button"
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { products } from "@/showcase/data"
-import { Block, Section } from "@/showcase/section"
+import { Section, Specimen } from "@/showcase/section"
 
-const quickLinks = [
+const quickLinks: QuickLinkItem[] = [
   { icon: Gamepad2Icon, label: "Games" },
   { icon: CreditCardIcon, label: "Gaming eCards" },
   { icon: GiftIcon, label: "eGift Cards" },
@@ -36,10 +34,9 @@ export function Galleries() {
     <Section
       id="galleries"
       title="Galleries"
-      description="Hero mosaic, the quick-category strip and the swipeable product rail with its centered “See all”."
-      className="bg-surface-deep"
+      description="Hero mosaic, the quick-category strip and and Block — the full-width section that sets the band color (page / band) and owns the title, ⓘ and centered action, so rails and tile grids inside stay title-less."
     >
-      <Block title="Hero mosaic">
+      <Specimen title="Hero mosaic">
         <HeroGallery
           main={
             <PromoBanner title="It's happening!" tone="bg-linear-to-r from-primary to-region-alt">
@@ -54,34 +51,35 @@ export function Galleries() {
             <PromoBanner key="c" title="Cheaper software" tone="bg-highlight text-highlight-foreground" />,
           ]}
         />
-      </Block>
+      </Specimen>
 
-      <Block title="Quick-category strip">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon-sm" aria-label="Scroll left">
-            <ChevronLeftIcon />
-          </Button>
-          <ScrollArea className="min-w-0 flex-1">
-            <div className="flex justify-between gap-2 pb-3">
-              {quickLinks.map((link) => (
-                <QuickLink key={link.label} {...link} />
+      <Specimen title="Quick-category strip">
+        <QuickLinkStrip items={quickLinks} />
+      </Specimen>
+
+      <Specimen title="Block · page tone, with title, info and action">
+        <div className="border border-border">
+          <Block title="Recommended for you" info action="See all">
+            <ProductRail>
+              {products.map((product) => (
+                <ProductCard key={product.title} product={product} />
               ))}
-            </div>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
-          <Button variant="ghost" size="icon-sm" aria-label="Scroll right">
-            <ChevronRightIcon />
-          </Button>
+            </ProductRail>
+          </Block>
         </div>
-      </Block>
+      </Specimen>
 
-      <Block title="Product rail">
-        <ProductRail title="Recommended for you">
-          {products.map((product) => (
-            <ProductCard key={product.title} product={product} />
-          ))}
-        </ProductRail>
-      </Block>
+      <Specimen title="Block · band tone">
+        <div className="border border-border">
+          <Block tone="band" title="Top games" info action="Show all">
+            <ProductRail>
+              {products.map((product) => (
+                <ProductCard key={product.title} product={product} />
+              ))}
+            </ProductRail>
+          </Block>
+        </div>
+      </Specimen>
     </Section>
   )
 }

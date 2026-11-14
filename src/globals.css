@@ -176,6 +176,11 @@
   --spacing-header-nav: 3.125rem; /* 50px — sub-header: menu + categories (bar + nav = 147px) */
   --spacing-page-top: 1.5625rem;     /* 25px — phone */
   --spacing-page-top-lg: 3.125rem;   /* 50px — desktop */
+
+  /* Homepage blocks (section bands) → py-block nav:py-block-lg, gap-block-gap */
+  --spacing-block: 2rem;        /* 32px — phone vertical padding */
+  --spacing-block-lg: 3.75rem;  /* 60px — desktop vertical padding */
+  --spacing-block-gap: 2rem;    /* 32px — title → content → action */
 }
 
 /*

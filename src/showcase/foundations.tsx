@@ -1,4 +1,4 @@
-import { Block, Section } from "@/showcase/section"
+import { Section, Specimen } from "@/showcase/section"
 import { ColorPair } from "@/showcase/color-pair"
 
 const pairs = [
@@ -70,15 +70,15 @@ export function Foundations() {
       title="Foundations"
       description="Colors sampled from the homepage designs. Every value lives in globals.css; components only reference tokens."
     >
-      <Block title="Color roles">
+      <Specimen title="Color roles">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {pairs.map((pair) => (
             <ColorPair key={pair.name} {...pair} />
           ))}
         </div>
-      </Block>
+      </Specimen>
 
-      <Block title="Palette">
+      <Specimen title="Palette">
         <div className="flex flex-col gap-6">
           {palette.map(({ group, tokens }) => (
             <div key={group} className="flex flex-col gap-3">
@@ -100,9 +100,9 @@ export function Foundations() {
             </div>
           ))}
         </div>
-      </Block>
+      </Specimen>
 
-      <Block title="Typography · Metropolis">
+      <Specimen title="Typography · Metropolis">
         <div className="overflow-x-auto">
           <table className="w-full min-w-xl border-collapse text-left">
             <thead className="type-caption text-muted-foreground">
@@ -129,9 +129,9 @@ export function Foundations() {
             </tbody>
           </table>
         </div>
-      </Block>
+      </Specimen>
 
-      <Block title="Shape & elevation">
+      <Specimen title="Shape & elevation">
         <div className="flex flex-wrap gap-6">
           <div className="flex flex-col gap-2">
             <div className="size-24 bg-card ring-1 ring-highlight" />
@@ -146,7 +146,7 @@ export function Foundations() {
             <span className="type-caption text-muted-foreground">1px white · outline</span>
           </div>
         </div>
-      </Block>
+      </Specimen>
     </Section>
   )
 }

@@ -10,7 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Block, Section } from "@/showcase/section"
+import { Section, Specimen } from "@/showcase/section"
 import { previewState, StateMatrix } from "@/showcase/state-matrix"
 
 const buttonVariants = ["default", "secondary", "highlight", "ghost", "link"] as const
@@ -31,7 +31,7 @@ export function Actions() {
       description="Primary is the solid electric violet from hero promos. Secondary is the white-outline button used for “See all” and “Load more”. Square corners, bold labels."
       className="bg-surface-deep"
     >
-      <Block title="Button · variants × states">
+      <Specimen title="Button · variants × states">
         <StateMatrix
           rows={buttonVariants}
           render={(variant, state) => (
@@ -40,9 +40,9 @@ export function Actions() {
             </Button>
           )}
         />
-      </Block>
+      </Specimen>
 
-      <Block title="Button · sizes">
+      <Specimen title="Button · sizes">
         <div className="flex flex-wrap items-center gap-4">
           <Button size="xs">Extra small</Button>
           <Button size="sm">Small</Button>
@@ -52,9 +52,9 @@ export function Actions() {
             Show all
           </Button>
         </div>
-      </Block>
+      </Specimen>
 
-      <Block title="Button · with icons">
+      <Specimen title="Button · with icons">
         <div className="flex flex-wrap items-center gap-4">
           <Button>
             <ShoppingCartIcon data-icon="inline-start" />
@@ -78,9 +78,9 @@ export function Actions() {
             <PlusIcon />
           </Button>
         </div>
-      </Block>
+      </Specimen>
 
-      <Block title="Input · search & subscribe">
+      <Specimen title="Input · search & subscribe">
         <div className="flex max-w-2xl flex-col gap-4">
           <div className="relative">
             <SearchIcon
@@ -100,9 +100,9 @@ export function Actions() {
             </Button>
           </div>
         </div>
-      </Block>
+      </Specimen>
 
-      <Block title="Badge">
+      <Specimen title="Badge">
         <div className="flex flex-wrap items-center gap-3">
           <Badge variant="cashback">
             <PlusIcon data-icon="inline-start" />
@@ -116,7 +116,7 @@ export function Actions() {
           <Badge variant="muted">Out of stock</Badge>
           <Badge variant="destructive">Region locked</Badge>
         </div>
-      </Block>
+      </Specimen>
     </Section>
   )
 }

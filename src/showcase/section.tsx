@@ -30,8 +30,8 @@ export function Section({
   )
 }
 
-/** Labeled block inside a section. */
-export function Block({
+/** Labeled specimen inside a styleguide section. */
+export function Specimen({
   title,
   children,
   className,

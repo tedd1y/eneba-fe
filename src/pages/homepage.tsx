@@ -1,9 +1,4 @@
-import { Header } from '@/components/layout/header'
-import { HeroGallery, PromoBanner } from '@/components/product/hero-gallery.tsx'
-import { Button } from '@/components/ui/button.tsx'
 import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
   CompassIcon,
   CreditCardIcon,
   CrosshairIcon,
@@ -19,16 +14,19 @@ import {
   WandSparklesIcon,
   ZapIcon,
 } from 'lucide-react'
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area.tsx'
-import { QuickLink } from '@/components/product/quick-link.tsx'
-import { Block } from '@/showcase/section.tsx'
-import { ProductRail } from '@/components/product/product-rail.tsx'
-import { products } from '@/showcase/data.ts'
-import { ProductCard } from '@/components/product/product-card.tsx'
-import { CategoryTile } from '@/components/product/category-tile.tsx'
-import { BrandTile } from '@/components/product/brand-tile.tsx'
 
-const quickLinks = [
+import { Block } from '@/components/layout/block'
+import { Header } from '@/components/layout/header'
+import { BrandTile } from '@/components/product/brand-tile'
+import { CategoryTile } from '@/components/product/category-tile'
+import { HeroGallery, PromoBanner } from '@/components/product/hero-gallery'
+import { ProductCard } from '@/components/product/product-card'
+import { ProductRail } from '@/components/product/product-rail'
+import { QuickLinkStrip, type QuickLinkItem } from '@/components/product/quick-link'
+import { Button } from '@/components/ui/button'
+import { products } from '@/showcase/data'
+
+const quickLinks: QuickLinkItem[] = [
   { icon: Gamepad2Icon, label: 'Games' },
   { icon: CreditCardIcon, label: 'Gaming eCards' },
   { icon: GiftIcon, label: 'eGift Cards' },
@@ -38,6 +36,8 @@ const quickLinks = [
   { icon: TrophyIcon, label: 'FIFA' },
   { icon: SmartphoneIcon, label: 'Mobile' },
 ]
+
+const brands = ['Razer Gold', 'iTunes', 'Amazon', 'Google Play', 'Netflix', 'Spotify']
 
 const categories = [
   { icon: ZapIcon, label: 'Action', count: 20699 },
@@ -68,56 +68,42 @@ export function HomePage() {
             <PromoBanner key="c" title="Cheaper software" tone="bg-highlight text-highlight-foreground" />,
           ]}
         />
-        <div className="page-container page-main">
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon-sm" aria-label="Scroll left">
-              <ChevronLeftIcon />
-            </Button>
-            <ScrollArea className="min-w-0 flex-1">
-              <div className="flex justify-between gap-2 pb-3">
-                {quickLinks.map(link => (
-                  <QuickLink key={link.label} {...link} />
-                ))}
-              </div>
-              <ScrollBar orientation="horizontal" />
-            </ScrollArea>
-            <Button variant="ghost" size="icon-sm" aria-label="Scroll right">
-              <ChevronRightIcon />
-            </Button>
+
+        <Block>
+          <QuickLinkStrip items={quickLinks} />
+        </Block>
+
+        <Block title="Recommended for you" info action="See all">
+          <ProductRail>
+            {products.map(product => (
+              <ProductCard key={product.title} product={product} />
+            ))}
+          </ProductRail>
+        </Block>
+
+        <Block tone="band" title="Top games" info action="Show all">
+          <ProductRail>
+            {products.map(product => (
+              <ProductCard key={product.title} product={product} />
+            ))}
+          </ProductRail>
+        </Block>
+
+        <Block title="Best selling eGift Cards" info action="Show all">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6">
+            {brands.map(name => (
+              <BrandTile key={name} name={name} />
+            ))}
           </div>
+        </Block>
 
-          <Block title="Product rail">
-            <ProductRail title="Recommended for you">
-              {products.map(product => (
-                <ProductCard key={product.title} product={product} />
-              ))}
-            </ProductRail>
-          </Block>
-
-          <Block title="Product rail">
-            <ProductRail title="Top games">
-              {products.map(product => (
-                <ProductCard key={product.title} product={product} />
-              ))}
-            </ProductRail>
-          </Block>
-
-          <Block title="eGift brand tile">
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6">
-              {['Razer Gold', 'iTunes', 'Amazon', 'Google Play', 'Netflix', 'Spotify'].map(name => (
-                <BrandTile key={name} name={name} />
-              ))}
-            </div>
-          </Block>
-
-          <Block title="Category tile">
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7">
-              {categories.map(category => (
-                <CategoryTile key={category.label} {...category} />
-              ))}
-            </div>
-          </Block>
-        </div>
+        <Block tone="band" title="Categories" action="Load more">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7">
+            {categories.map(category => (
+              <CategoryTile key={category.label} {...category} />
+            ))}
+          </div>
+        </Block>
       </main>
     </div>
   )

@@ -12,7 +12,7 @@ import { BrandTile } from "@/components/product/brand-tile"
 import { CategoryTile } from "@/components/product/category-tile"
 import { ProductCard, ProductCardRow } from "@/components/product/product-card"
 import { products } from "@/showcase/data"
-import { Block, Section } from "@/showcase/section"
+import { Section, Specimen } from "@/showcase/section"
 
 const categories = [
   { icon: ZapIcon, label: "Action", count: 20699 },
@@ -31,37 +31,37 @@ export function Cards() {
       title="Cards"
       description="Product cards carry a mint outline on the deep card surface. Price is the loudest element; cashback is always lime."
     >
-      <Block title="Product card · vertical (desktop, tablet)">
+      <Specimen title="Product card · vertical (desktop, tablet)">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
           {products.slice(0, 5).map((product) => (
             <ProductCard key={product.title} product={product} />
           ))}
         </div>
-      </Block>
+      </Specimen>
 
-      <Block title="Product card · row (phone)">
+      <Specimen title="Product card · row (phone)">
         <div className="grid max-w-3xl grid-cols-1 gap-4 md:grid-cols-2">
           {products.slice(2, 6).map((product) => (
             <ProductCardRow key={product.title} product={product} />
           ))}
         </div>
-      </Block>
+      </Specimen>
 
-      <Block title="Category tile">
+      <Specimen title="Category tile">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7">
           {categories.map((category) => (
             <CategoryTile key={category.label} {...category} />
           ))}
         </div>
-      </Block>
+      </Specimen>
 
-      <Block title="eGift brand tile">
+      <Specimen title="eGift brand tile">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6">
           {["Razer Gold", "iTunes", "Amazon", "Google Play", "Netflix", "Spotify"].map((name) => (
             <BrandTile key={name} name={name} />
           ))}
         </div>
-      </Block>
+      </Specimen>
     </Section>
   )
 }

@@ -1,0 +1,253 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource/metropolis/400.css";
+@import "@fontsource/metropolis/500.css";
+@import "@fontsource/metropolis/600.css";
+@import "@fontsource/metropolis/700.css";
+@import "@fontsource/metropolis/800.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Lets the styleguide pin interaction states with data-preview="hover focus active". */
+@custom-variant hover {
+  @media (hover: hover) {
+    &:hover {
+      @slot;
+    }
+  }
+  &[data-preview~="hover"] {
+    @slot;
+  }
+}
+@custom-variant focus-visible (&:focus-visible, &[data-preview~="focus"]);
+@custom-variant active (&:active, &[data-preview~="active"]);
+
+/*
+ * Eneba theme — sampled from design/brand/homepage.
+ * The storefront is a single dark-purple theme, so :root and .dark are identical.
+ * Components must only reference these tokens (bg-primary, text-price, …), never raw values.
+ */
+:root {
+  /* Surfaces */
+  --background: #4618ac; /* main page purple */
+  --foreground: #ffffff;
+  --surface-deep: #301078; /* alternating section band */
+  --surface-nav: #341281; /* category nav bar under header */
+  --surface-footer: #150733; /* footer */
+  --surface-tile: #5825cc; /* category tiles */
+  --card: #1f0a4d; /* product card body */
+  --card-foreground: #ffffff;
+  --popover: #1f0a4d;
+  --popover-foreground: #ffffff;
+
+  /* Actions */
+  --primary: #4200ff; /* "Shop cards" electric violet */
+  --primary-foreground: #ffffff;
+  --primary-hover: #5a24ff;
+  --secondary: transparent; /* white-outline buttons ("See all", "Load more") */
+  --secondary-foreground: #ffffff;
+  --secondary-hover: rgb(255 255 255 / 10%);
+
+  /* Text */
+  --muted: #301078;
+  --muted-foreground: #b3aac9; /* "From", info icons, footer copy */
+  --placeholder: #aa95d9; /* search placeholder */
+
+  /* Brand accents */
+  --accent: #3c1395; /* menu hover / dividers */
+  --accent-foreground: #ffffff;
+  --highlight: #63e3c2; /* cashback badge + card outline */
+  --highlight-foreground: #1f0a4d;
+  --cashback: #84e916; /* "Cashback: €9.07" */
+  --region-eu: #23c299; /* region label: Europe */
+  --region-alt: #e76a8c; /* region label: other / highlighted region */
+  --discount: #e76a8c;
+
+  /* Lines & states */
+  --border: rgb(255 255 255 / 12%);
+  --border-strong: #ffffff; /* search box, outline buttons */
+  --input: #ffffff;
+  --ring: #63e3c2;
+  --destructive: #ff5a5f;
+  --overlay: rgb(14 8 20 / 60%);
+
+  /* Charts (brand-ordered) */
+  --chart-1: #63e3c2;
+  --chart-2: #4200ff;
+  --chart-3: #e76a8c;
+  --chart-4: #84e916;
+  --chart-5: #fdbf45;
+
+  /* Shape — Eneba is square-cornered */
+  --radius: 0rem;
+
+  /* Side menu */
+  --sidebar: #4618ac;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #4200ff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #3c1395;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #3c1395;
+  --sidebar-ring: #63e3c2;
+
+  color-scheme: dark;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: "Metropolis", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-sans);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface-deep: var(--surface-deep);
+  --color-surface-nav: var(--surface-nav);
+  --color-surface-footer: var(--surface-footer);
+  --color-surface-tile: var(--surface-tile);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-placeholder: var(--placeholder);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
+  --color-cashback: var(--cashback);
+  --color-region-eu: var(--region-eu);
+  --color-region-alt: var(--region-alt);
+  --color-discount: var(--discount);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-overlay: var(--overlay);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --radius-sm: var(--radius);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius);
+  --radius-xl: var(--radius);
+  --radius-2xl: var(--radius);
+  --radius-3xl: var(--radius);
+  --radius-4xl: var(--radius);
+
+  --container-page: 80rem; /* max content width */
+}
+
+/* Elevation — Eneba is flat; only category tiles float. */
+@theme {
+  --shadow-xs: 0 0 #0000;
+  --shadow-sm: 0 0 #0000;
+  --shadow-lg: 0 8px 24px rgb(14 8 20 / 0.35);
+
+  /* Header switches from compact (phone) to full (tablet/desktop) at 930px → `nav:` / `max-nav:` */
+  --breakpoint-nav: 58.125rem;
+
+  /* Header heights (from design/brand/homepage) → h-header-mobile, h-header-bar, h-header-nav */
+  --spacing-header-mobile: 3.4375rem; /* 55px — phone, single row */
+  --spacing-header-bar: 6.0625rem; /* 97px — logo / search / actions row */
+  --spacing-header-nav: 3.125rem; /* 50px — sub-header: menu + categories (bar + nav = 147px) */
+}
+
+/*
+ * Type scale — sampled from the desktop homepage.
+ * Utilities (not --text-* keys) so cn() never mistakes them for colors.
+ */
+@utility type-display {
+  font-size: clamp(1.75rem, 2vw + 1rem, 2.5rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+@utility type-h1 {
+  font-size: clamp(1.5rem, 1.2vw + 1rem, 2rem);
+  font-weight: 700;
+  line-height: 1.2;
+}
+@utility type-h2 {
+  /* Section titles: "Recommended for you" */
+  font-size: clamp(1.25rem, 0.6vw + 1rem, 1.5rem);
+  font-weight: 700;
+  line-height: 1.25;
+}
+@utility type-h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+@utility type-price {
+  /* "€82.44" */
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+@utility type-nav {
+  /* Header nav, side menu rows */
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+@utility type-body {
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+@utility type-card-title {
+  /* Product names, 2-line clamp */
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+@utility type-label {
+  /* Region, "From", "Cashback: €9.07", buttons */
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+@utility type-caption {
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans antialiased;
+  }
+  body {
+    @apply bg-background type-body text-foreground;
+  }
+  ::placeholder {
+    @apply text-placeholder;
+  }
+}

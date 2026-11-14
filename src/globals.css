@@ -158,7 +158,7 @@
   --radius-3xl: var(--radius);
   --radius-4xl: var(--radius);
 
-  --container-page: 80rem; /* max content width */
+  --container-page: 77.5rem; /* max content width */
 }
 
 /* Elevation — Eneba is flat; only category tiles float. */
@@ -174,6 +174,8 @@
   --spacing-header-mobile: 3.4375rem; /* 55px — phone, single row */
   --spacing-header-bar: 6.0625rem; /* 97px — logo / search / actions row */
   --spacing-header-nav: 3.125rem; /* 50px — sub-header: menu + categories (bar + nav = 147px) */
+  --spacing-page-top: 1.5625rem;     /* 25px — phone */
+  --spacing-page-top-lg: 3.125rem;   /* 50px — desktop */
 }
 
 /*
@@ -235,6 +237,26 @@
   font-size: 0.75rem;
   font-weight: 400;
   line-height: 1.4;
+}
+
+@utility page-container {
+  width: 100%;
+  max-width: var(--container-page);
+  margin-inline: auto;
+  padding-inline: 1rem;        /* phone */
+  @media (width >= 48rem) {
+    padding-inline: 1.5rem;    /* tablet */
+  }
+  @media (width >= 80rem) {
+    padding-inline: 2rem;      /* desktop */
+  }
+}
+
+@utility page-main {
+  padding-top: var(--spacing-page-top);
+  @media (width >= 58.125rem) {
+    padding-top: var(--spacing-page-top-lg);
+  }
 }
 
 @layer base {

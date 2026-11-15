@@ -18,7 +18,6 @@ import {
   donationTotals,
   picks,
 } from '@/showcase/cart-data'
-import { Section } from '@/showcase/section'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -151,13 +150,9 @@ export function Cart() {
     <>
       {/* Checkout flow uses its own header, pinned to the top like the site header. */}
       <CheckoutHeader steps={checkoutSteps} current={0} className="sticky top-0 z-40" />
-      <Section
-        id="cart"
-        title="Cart"
-        description="Pieces sampled from design/brand/cart, assembled with dummy data. Quantities, removal, donation and discount code (try SAVE10) recalculate the summary; checkout validates the email."
-      >
+      <main className="page-container page-main pb-block-lg">
         <CartPage />
-      </Section>
+      </main>
     </>
   )
 }

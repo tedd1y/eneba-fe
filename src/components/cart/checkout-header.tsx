@@ -52,7 +52,7 @@ function CheckoutSteps({ steps, current, className }: { steps: CheckoutStep[], c
 function CheckoutHeader({
   steps,
   current,
-  homeHref = '/home',
+  homeHref = '/',
   className,
 }: {
   steps: CheckoutStep[]

@@ -16,7 +16,6 @@ import {
 } from 'lucide-react'
 
 import { Block } from '@/components/layout/block'
-import { Header } from '@/components/layout/header'
 import { BrandTile } from '@/components/product/brand-tile'
 import { CategoryTile } from '@/components/product/category-tile'
 import { HeroGallery, PromoBanner } from '@/components/product/hero-gallery'
@@ -52,7 +51,6 @@ const categories = [
 export function Home() {
   return (
     <div>
-      <Header />
       <main>
         <HeroGallery
           main={(

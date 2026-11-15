@@ -1,4 +1,3 @@
-import { Header } from '@/components/layout/header.tsx'
 import { Section } from '@/showcase/section.tsx'
 import { FilterSection, FilterSidebar } from '@/components/store/filter-section.tsx'
 import { RangeFilter, type RangeValue } from '@/components/store/range-filter.tsx'
@@ -142,7 +141,6 @@ function WiredStore() {
 export function Store() {
   return (
     <div>
-      <Header />
       <Section
         id="store"
         title="Store"

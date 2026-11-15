@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils'
 import { HeartIcon, SearchIcon, ShoppingCartIcon, UserIcon } from "lucide-react"
 
 import { Logo } from "@/components/layout/logo"
@@ -41,9 +42,9 @@ function SearchField() {
  * - Full (≥ 930px): 147px — 97px bar (logo, search, locale, actions) + 50px sub-header
  *   (Categories menu, then category links).
  */
-function Header({ navLinks = defaultNavLinks }: { navLinks?: NavLink[] }) {
+function Header({ navLinks = defaultNavLinks, className }: { navLinks?: NavLink[], className?: string }) {
   return (
-    <header className="bg-background">
+    <header className={cn('bg-background', className)}>
       <div className="mx-auto flex h-header-mobile max-w-page items-center gap-2 px-2 nav:h-header-bar nav:gap-6 nav:px-8">
         <div className="nav:hidden">
           <SideMenu trigger="icon" />

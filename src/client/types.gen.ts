@@ -28,6 +28,93 @@ export type FilterOptionResource = {
 export type Platform = 'steam' | 'epic_games' | 'gog' | 'ea_app' | 'ubisoft_connect' | 'battle_net' | 'xbox' | 'playstation' | 'nintendo';
 
 /**
+ * ProductDetailResource
+ */
+export type ProductDetailResource = {
+    id: number;
+    title: string;
+    /**
+     * URL-friendly unique identifier, used to fetch a single product.
+     */
+    slug: string;
+    /**
+     * Platform the key activates on.
+     */
+    platform: {
+        value: 'steam' | 'epic_games' | 'gog' | 'ea_app' | 'ubisoft_connect' | 'battle_net' | 'xbox' | 'playstation' | 'nintendo';
+        label: 'Steam' | 'Epic Games' | 'GOG' | 'EA App' | 'Ubisoft Connect' | 'Battle.net' | 'Xbox' | 'PlayStation' | 'Nintendo';
+    };
+    /**
+     * Region the key can be activated in.
+     */
+    region: {
+        value: 'global' | 'europe' | 'north_america' | 'united_kingdom' | 'latin_america' | 'asia';
+        label: 'Global' | 'Europe' | 'North America' | 'United Kingdom' | 'Latin America' | 'Asia';
+    };
+    /**
+     * Kind of product.
+     */
+    type: {
+        value: 'game' | 'dlc' | 'gift_card' | 'subscription' | 'in_game_currency';
+        label: 'Game' | 'DLC' | 'Gift Card' | 'Subscription' | 'In-Game Currency';
+    };
+    /**
+     * Current selling price.
+     */
+    price: {
+        /**
+         * Amount in minor units (cents).
+         */
+        amount: number;
+        /**
+         * Amount formatted for display in the given currency.
+         */
+        formatted: string;
+    };
+    /**
+     * Price before discount, or null when the product is not discounted.
+     */
+    original_price: {
+        /**
+         * Amount in minor units (cents).
+         */
+        amount: number;
+        /**
+         * Amount formatted for display in the given currency.
+         */
+        formatted: string;
+    } | null;
+    /**
+     * Cashback earned on purchase, or null when none is offered.
+     */
+    cashback: {
+        /**
+         * Amount in minor units (cents).
+         */
+        amount: number;
+        /**
+         * Amount formatted for display in the given currency.
+         */
+        formatted: string;
+    } | null;
+    /**
+     * Discount from `original_price` to `price`, as a whole percentage (0 when not discounted).
+     */
+    discount_percent: number;
+    /**
+     * ISO 4217 currency code for all amounts.
+     */
+    currency: string;
+    image_url: string;
+    created_at: string | null;
+    updated_at: string | null;
+    /**
+     * Long-form product description as plain text. Paragraphs are separated by blank lines.
+     */
+    description: string | null;
+};
+
+/**
  * ProductFilterOptionsResource
  */
 export type ProductFilterOptionsResource = {
@@ -307,10 +394,10 @@ export type V1ProductsShowError = V1ProductsShowErrors[keyof V1ProductsShowError
 
 export type V1ProductsShowResponses = {
     /**
-     * `ProductResource`
+     * `ProductDetailResource`
      */
     200: {
-        data: ProductResource;
+        data: ProductDetailResource;
     };
 };
 

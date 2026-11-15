@@ -24,7 +24,7 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 export const v1ProductsIndex = <ThrowOnError extends boolean = false>(options?: Options<V1ProductsIndexData, ThrowOnError>): RequestResult<V1ProductsIndexResponses, V1ProductsIndexErrors, ThrowOnError> => (options?.client ?? client).get<V1ProductsIndexResponses, V1ProductsIndexErrors, ThrowOnError>({ url: '/v1/products', ...options });
 
 /**
- * Display the specified product
+ * Display the specified product, including its description
  */
 export const v1ProductsShow = <ThrowOnError extends boolean = false>(options: Options<V1ProductsShowData, ThrowOnError>): RequestResult<V1ProductsShowResponses, V1ProductsShowErrors, ThrowOnError> => (options.client ?? client).get<V1ProductsShowResponses, V1ProductsShowErrors, ThrowOnError>({ url: '/v1/products/{product}', ...options });
 

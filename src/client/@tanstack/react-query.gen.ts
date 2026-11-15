@@ -119,7 +119,7 @@ export const v1ProductsIndexInfiniteOptions = (options?: Options<V1ProductsIndex
 export const v1ProductsShowQueryKey = (options: Options<V1ProductsShowData>) => createQueryKey('v1ProductsShow', options);
 
 /**
- * Display the specified product
+ * Display the specified product, including its description
  */
 export const v1ProductsShowOptions = (options: Options<V1ProductsShowData>) => queryOptions<V1ProductsShowResponse, V1ProductsShowError, V1ProductsShowResponse, ReturnType<typeof v1ProductsShowQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {

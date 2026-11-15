@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -35,16 +35,31 @@ function DescriptionBody({ blocks }: { blocks: DescriptionBlock[] }) {
 /** Clamps tall content behind a fade with a centred "Read more" toggle. */
 function Expandable({ children, collapsedClass = 'max-h-96' }: { children: React.ReactNode, collapsedClass?: string }) {
   const [open, setOpen] = useState(false)
+  const [overflows, setOverflows] = useState(false)
+  const boxRef = useRef<HTMLDivElement>(null)
+
+  // Only clamp (fade + "Read more") when the content is actually taller than the collapsed box.
+  useLayoutEffect(() => {
+    const box = boxRef.current
+    if (!box || open) return
+    const measure = () => setOverflows(box.scrollHeight > box.clientHeight + 1)
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(box)
+    return () => observer.disconnect()
+  }, [open])
 
   return (
     <div className="flex flex-col gap-3">
-      <div className={cn('relative overflow-hidden', !open && collapsedClass)}>
+      <div ref={boxRef} className={cn('relative overflow-hidden', !open && collapsedClass)}>
         {children}
-        {!open && <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-linear-to-b from-transparent to-surface-deep" aria-hidden />}
+        {!open && overflows && <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-linear-to-b from-transparent to-surface-deep" aria-hidden />}
       </div>
-      <Button variant="attention" size="text" className="self-center type-body font-normal" aria-expanded={open} onClick={() => setOpen(o => !o)}>
-        {open ? 'Show less' : 'Read more'}
-      </Button>
+      {(overflows || open) && (
+        <Button variant="attention" size="text" className="self-center type-body font-normal" aria-expanded={open} onClick={() => setOpen(o => !o)}>
+          {open ? 'Show less' : 'Read more'}
+        </Button>
+      )}
     </div>
   )
 }
@@ -62,14 +77,15 @@ function DescriptionTabs({
   rating?: number
   ratingCount?: number
   description: DescriptionBlock[]
-  activationSteps: string[]
+  /** Omit to hide the "Activation guide" tab. */
+  activationSteps?: string[]
   className?: string
 }) {
   return (
     <Tabs defaultValue="description" className={cn('gap-0', className)}>
       <TabsList variant="panel">
         <TabsTrigger value="description">Description</TabsTrigger>
-        <TabsTrigger value="activation">Activation guide</TabsTrigger>
+        {activationSteps && <TabsTrigger value="activation">Activation guide</TabsTrigger>}
       </TabsList>
       <TabsContent value="description" className="flex flex-col gap-5 bg-surface-deep p-5 pt-8">
         <h3 className="type-h3">{title}</h3>
@@ -90,11 +106,13 @@ function DescriptionTabs({
           </div>
         </Expandable>
       </TabsContent>
-      <TabsContent value="activation" className="bg-surface-deep p-5 pt-8">
-        <ol className="flex list-inside list-decimal flex-col gap-2 type-body text-muted-foreground">
-          {activationSteps.map(step => <li key={step}>{step}</li>)}
-        </ol>
-      </TabsContent>
+      {activationSteps && (
+        <TabsContent value="activation" className="bg-surface-deep p-5 pt-8">
+          <ol className="flex list-inside list-decimal flex-col gap-2 type-body text-muted-foreground">
+            {activationSteps.map(step => <li key={step}>{step}</li>)}
+          </ol>
+        </TabsContent>
+      )}
     </Tabs>
   )
 }

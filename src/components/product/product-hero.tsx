@@ -40,12 +40,13 @@ function WishlistToggle({
   defaultActive = false,
   onToggle,
 }: {
-  count: number
+  /** Omit to show the heart without a counter. */
+  count?: number
   defaultActive?: boolean
   onToggle?: (active: boolean) => void
 }) {
   const [active, setActive] = useState(defaultActive)
-  const shown = count + (active && !defaultActive ? 1 : 0) - (!active && defaultActive ? 1 : 0)
+  const shown = count === undefined ? undefined : count + (active && !defaultActive ? 1 : 0) - (!active && defaultActive ? 1 : 0)
 
   return (
     <Button
@@ -59,7 +60,7 @@ function WishlistToggle({
       className="h-auto shrink-0 flex-col gap-1 bg-surface-deep px-3 py-2 type-caption"
     >
       <HeartIcon className={cn(active && 'fill-attention text-attention')} aria-hidden />
-      {shown.toLocaleString()}
+      {shown?.toLocaleString()}
     </Button>
   )
 }
@@ -101,7 +102,8 @@ function FeatureList({ features }: { features: ProductFeature[] }) {
  */
 function ProductHero({
   title,
-  cover,
+  cover = 'bg-linear-to-br from-surface-tile to-primary',
+  image,
   badge,
   wishlistCount,
   features,
@@ -110,17 +112,24 @@ function ProductHero({
   className,
 }: {
   title: string
-  cover: string
+  /** Token classes for the placeholder, shown when there's no `image` or it fails to load. */
+  cover?: string
+  image?: string
   badge?: string
-  wishlistCount: number
+  wishlistCount?: number
   features: ProductFeature[]
   worksOn?: string[]
   requirementsHref?: string
   className?: string
 }) {
+  // Remember which URL failed, so navigating to another product retries its image.
+  const [failedImage, setFailedImage] = useState<string>()
+
   return (
     <div className={cn('grid grid-cols-[5rem_1fr] gap-x-4 gap-y-6 md:grid-cols-[var(--spacing-product-cover)_1fr] md:grid-rows-[auto_1fr] md:gap-x-8', className)}>
-      <div className={cn('aspect-[5/7] w-full md:row-span-2 md:self-start', cover)} role="img" aria-label={`${title} cover`} />
+      {image && failedImage !== image
+        ? <img src={image} alt={`${title} cover`} onError={() => setFailedImage(image)} className="aspect-[5/7] w-full object-cover md:row-span-2 md:self-start" />
+        : <div className={cn('aspect-[5/7] w-full md:row-span-2 md:self-start', cover)} role="img" aria-label={`${title} cover`} />}
 
       <div className="flex min-w-0 items-start gap-4">
         <div className="flex min-w-0 flex-1 flex-col gap-2">

@@ -1,162 +1,216 @@
-import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { CircleCheckIcon, Gamepad2Icon, HandCoinsIcon, KeyRoundIcon } from 'lucide-react'
+import { useParams } from 'react-router'
 
+import type { ProductDetailResource } from '@/client'
+import { v1ProductsShowOptions } from '@/client/@tanstack/react-query.gen.ts'
 import { AlsoViewed } from '@/components/product/also-viewed'
 import { CheckoutTrustPanel, DealsSignup, FeaturedOfferPanel } from '@/components/product/buy-box'
 import { MediaStrip } from '@/components/product/media-strip'
-import { OfferList, OfferRow } from '@/components/product/offer-list'
-import { PriceTag } from '@/components/product/price-tag'
+import { OfferList } from '@/components/product/offer-list'
 import { DescriptionTabs, DetailSection, SpecList, SystemRequirements, TagList } from '@/components/product/product-details'
 import { ProductBreadcrumbs, ProductHero } from '@/components/product/product-hero'
-import { ReviewItem, ReviewList } from '@/components/product/reviews'
-import { StarRating } from '@/components/product/star-rating'
-import {
-  activationSteps,
-  alsoViewed,
-  breadcrumbs,
-  description,
-  featuredOffer,
-  features,
-  media,
-  otherDetails,
-  otherOffers,
-  paymentMethods,
-  product,
-  ratingAspects,
-  recommendedOffers,
-  requirements,
-  reviews,
-} from '@/showcase/product-data'
-import { Section, Specimen } from '@/showcase/section'
+import { ReviewList } from '@/components/product/reviews'
+import type {
+  BreadcrumbItem,
+  DescriptionBlock,
+  FeaturedOffer,
+  MediaItem,
+  Offer,
+  ProductFeature,
+  RatingAspect,
+  RequirementSet,
+  Review,
+  SpecRow,
+} from '@/components/product/types'
+import type { Product as CardProduct } from '@/components/product/product-card'
+
+/** Site-wide payment methods; not product data. */
+const paymentMethods = ['Wallet', 'Visa', 'PayPal', 'Swedbank', 'SEB', 'Luminor', 'Revolut', 'Artea', 'LKU', 'Apple Pay', 'Google Pay', 'Citadele', 'Crypto']
 
 /**
- * The whole product page assembled from the pieces below, fed by product-data.ts.
- * Desktop: content column + 350px buy box. Phone: buy box drops in right after the hero.
+ * Everything the product page renders. Fields the API doesn't provide yet are empty / undefined,
+ * and the matching section stays hidden until they're filled.
  */
-function ProductPage() {
-  const [lastAction, setLastAction] = useState('Nothing yet: try a button')
+type ProductView = {
+  title: string
+  image?: string
+  badge?: string
+  breadcrumbs: BreadcrumbItem[]
+  features: ProductFeature[]
+  offer: FeaturedOffer
+  description: DescriptionBlock[]
+  details: SpecRow[]
+  // Not in the API yet.
+  wishlistCount?: number
+  worksOn?: string[]
+  tags: string[]
+  media: MediaItem[]
+  recommendedOffers: Offer[]
+  otherOffers: Offer[]
+  alsoViewed: CardProduct[]
+  reviewTotal?: number
+  ratingAspects: RatingAspect[]
+  reviews: Review[]
+  rating?: number
+  ratingCount?: number
+  activationSteps?: string[]
+  requirements: RequirementSet[]
+}
+
+/** Plain-text description → paragraphs (the API separates them with blank lines). */
+function toDescription(text: string | null): DescriptionBlock[] {
+  if (!text) return []
+  return text
+    .split(/\n\s*\n/)
+    .map(p => p.trim())
+    .filter(Boolean)
+    .map(p => ({ kind: 'paragraph' as const, text: p }))
+}
+
+/** Maps an API product onto what the product page components render. Nullable fields fall back to undefined / []. */
+function toProductView(p: ProductDetailResource): ProductView {
+  return {
+    title: p.title,
+    image: p.image_url || undefined,
+    badge: p.cashback ? 'Cashback deal' : undefined,
+    breadcrumbs: [
+      { label: 'Store', href: '/store' },
+      { label: p.type.label, href: '/store' },
+      { label: p.title },
+    ],
+    features: [
+      {
+        icon: CircleCheckIcon,
+        title: p.region.label,
+        lines: [{ text: `Can be activated in ${p.region.label}` }],
+      },
+      {
+        icon: Gamepad2Icon,
+        title: p.platform.label,
+        lines: [{ text: `Activate/redeem on ${p.platform.label}` }],
+      },
+      {
+        icon: KeyRoundIcon,
+        title: 'Digital key',
+        lines: [
+          { text: 'This is a digital edition of the product (CD-KEY)' },
+          { text: 'Instant delivery', positive: true },
+        ],
+      },
+      {
+        icon: HandCoinsIcon,
+        title: 'Instant refunds',
+        lines: [{ text: 'Unlike other marketplaces, Eneba allows you to get an instant refund for unviewed keys.' }],
+      },
+    ],
+    offer: {
+      price: p.price.formatted,
+      oldPrice: p.original_price?.formatted,
+      discount: p.discount_percent > 0 ? `-${p.discount_percent}%` : undefined,
+      // API gives a cashback amount, not a percentage; PriceTag renders "<value> Cashback".
+      cashbackPercent: p.cashback?.formatted,
+    },
+    description: toDescription(p.description),
+    details: [
+      { label: 'Platform', value: p.platform.label },
+      { label: 'Region', value: p.region.label },
+      { label: 'Type', value: p.type.label },
+    ],
+    tags: [],
+    media: [],
+    recommendedOffers: [],
+    otherOffers: [],
+    alsoViewed: [],
+    ratingAspects: [],
+    reviews: [],
+    requirements: [],
+  }
+}
+
+/**
+ * Product page for `/:slug`. Desktop: content column + 350px buy box; phone: buy box after the hero.
+ * Sections render only when their data exists, so unsupported ones stay hidden but wired.
+ */
+export function Product() {
+  const { slug = '' } = useParams()
+  const { data } = useQuery({
+    ...v1ProductsShowOptions({ path: { product: slug } }),
+    enabled: slug !== '',
+  })
+
+  if (!data) return <main className="page-container page-main" aria-busy="true" />
+
+  const product = toProductView(data.data)
 
   return (
-    <div className="flex flex-col gap-6">
-      <p className="type-caption text-muted-foreground" aria-live="polite">
-        Last action:
-        {' '}
-        <span className="text-attention">{lastAction}</span>
-      </p>
-      <ProductBreadcrumbs items={breadcrumbs} />
+    <main className="flex page-container page-main flex-col gap-6 pb-block-lg">
+      <ProductBreadcrumbs items={product.breadcrumbs} />
 
       <div className="grid gap-x-8 gap-y-10 lg:grid-cols-[1fr_var(--spacing-buy-box)]">
         <ProductHero
           title={product.title}
-          cover={product.cover}
+          image={product.image}
           badge={product.badge}
           wishlistCount={product.wishlistCount}
-          features={features}
+          features={product.features}
           worksOn={product.worksOn}
           className="lg:col-start-1"
         />
 
         <aside className="flex flex-col gap-2 lg:col-start-2 lg:row-span-2 lg:row-start-1">
-          <FeaturedOfferPanel
-            offer={featuredOffer}
-            onBuy={() => setLastAction('Buy now: featured offer')}
-            onExpress={() => setLastAction('Express checkout')}
-            onAddToCart={() => setLastAction('Added featured offer to cart')}
-          />
+          <FeaturedOfferPanel offer={product.offer} />
           <CheckoutTrustPanel paymentMethods={paymentMethods} trustScore="100/100" />
-          <DealsSignup onSubscribe={() => setLastAction('Subscribe')} />
+          <DealsSignup />
         </aside>
 
         <div className="flex min-w-0 flex-col gap-12 lg:col-start-1">
-          <MediaStrip items={media} onSelect={item => setLastAction(`Opened ${item.alt}`)} />
-          <OfferList title="Recommended offers" offers={recommendedOffers} onBuy={o => setLastAction(`Buy now: ${o.seller.name} ${o.price}`)} />
-          <OfferList
-            id="offers"
-            title="other offers"
-            highlightCount
-            offers={otherOffers}
-            initialCount={3}
-            onBuy={o => setLastAction(`Buy now: ${o.seller.name} ${o.price}`)}
-          />
+          {product.media.length > 0 && <MediaStrip items={product.media} />}
+          {product.recommendedOffers.length > 0 && (
+            <OfferList title="Recommended offers" offers={product.recommendedOffers} />
+          )}
+          {product.otherOffers.length > 0 && (
+            <OfferList id="offers" title="other offers" highlightCount offers={product.otherOffers} initialCount={3} />
+          )}
 
-          <DetailSection title="Gamers also viewed">
-            <AlsoViewed products={alsoViewed} initialCount={3} onAddToCart={x => setLastAction(`Added ${x.title} to cart`)} />
-          </DetailSection>
+          {product.alsoViewed.length > 0 && (
+            <DetailSection title="Gamers also viewed">
+              <AlsoViewed products={product.alsoViewed} initialCount={3} />
+            </DetailSection>
+          )}
 
-          <ReviewList
-            total={product.reviewCount}
-            aspects={ratingAspects}
-            reviews={reviews}
-            onReview={() => setLastAction('Review now')}
-          />
-
-          <DetailSection title="Product Details">
-            <TagList tags={product.tags} />
-            <DescriptionTabs
-              title={product.shortTitle}
-              rating={product.rating}
-              ratingCount={product.ratingCount}
-              description={description}
-              activationSteps={activationSteps}
+          {product.reviews.length > 0 && (
+            <ReviewList
+              total={product.reviewTotal ?? product.reviews.length}
+              aspects={product.ratingAspects}
+              reviews={product.reviews}
             />
-          </DetailSection>
+          )}
 
-          <DetailSection id="system-requirements" title="System requirements">
-            <SystemRequirements sets={requirements} />
-          </DetailSection>
+          {product.description.length > 0 && (
+            <DetailSection title="Product Details">
+              {product.tags.length > 0 && <TagList tags={product.tags} />}
+              <DescriptionTabs
+                title={product.title}
+                rating={product.rating}
+                ratingCount={product.ratingCount}
+                description={product.description}
+                activationSteps={product.activationSteps}
+              />
+            </DetailSection>
+          )}
+
+          {product.requirements.length > 0 && (
+            <DetailSection id="system-requirements" title="System requirements">
+              <SystemRequirements sets={product.requirements} />
+            </DetailSection>
+          )}
 
           <DetailSection title="Other details">
-            <SpecList rows={otherDetails} className="bg-surface-deep p-5" />
+            <SpecList rows={product.details} className="bg-surface-deep p-5" />
           </DetailSection>
         </div>
       </div>
-    </div>
-  )
-}
-
-export function Product() {
-  return (
-    <Section
-      id="product"
-      title="Product page"
-      description="Pieces sampled from design/brand/product, then assembled with dummy data. Offer lists, reviews and description reveal more on click; votes, wishlist and translate toggle locally."
-    >
-      <ProductPage />
-
-      <div className="grid gap-12 lg:grid-cols-2">
-        <Specimen title="Star rating: whole and fractional">
-          <div className="flex flex-col gap-3">
-            {[5, 4, 4.57, 2.5, 0].map(v => (
-              <p key={v} className="flex items-center gap-3 type-body">
-                <StarRating value={v} />
-                <StarRating value={v} size="md" />
-                <span className="text-muted-foreground">{v}</span>
-              </p>
-            ))}
-          </div>
-        </Specimen>
-
-        <Specimen title="Price tag: plain, discounted, best cashback">
-          <div className="flex flex-wrap items-start gap-10 bg-surface-deep p-5">
-            <PriceTag price="€55.89" cashbackPercent="11%" />
-            <PriceTag price="€29.99" oldPrice="€32.99" discount="-9%" cashbackPercent="11%" />
-            <PriceTag price="€31.49" oldPrice="€32.99" discount="-5%" cashbackPercent="14%" bestCashback />
-          </div>
-        </Specimen>
-
-        <Specimen title="Offer row: Eneba-verified vs rated seller">
-          <ul className="flex flex-col gap-2">
-            <OfferRow offer={recommendedOffers[0]} />
-            <OfferRow offer={otherOffers[1]} />
-          </ul>
-        </Specimen>
-
-        <Specimen title="Review: short, translated, long (Read more)">
-          <div className="flex flex-col gap-0.5">
-            <ReviewItem review={reviews[0]} />
-            <ReviewItem review={reviews[2]} />
-          </div>
-        </Specimen>
-      </div>
-    </Section>
+    </main>
   )
 }

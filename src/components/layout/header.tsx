@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils'
 import { HeartIcon, SearchIcon, ShoppingCartIcon, UserIcon } from "lucide-react"
+import { Link } from "react-router"
 
 import { Logo } from "@/components/layout/logo"
 import { SideMenu } from "@/components/layout/side-menu"
@@ -10,13 +11,13 @@ import { Separator } from "@/components/ui/separator"
 export type NavLink = { label: string; href: string }
 
 const defaultNavLinks: NavLink[] = [
-  { label: "Cheap Games", href: "#" },
-  { label: "Software", href: "#" },
-  { label: "eGift Cards", href: "#" },
-  { label: "Eneba Gift Cards", href: "#" },
-  { label: "Probably Stolen", href: "#" },
-  { label: "FM27", href: "#" },
-  { label: "GTA VI", href: "#" },
+  { label: "Cheap Games", href: "/store" },
+  { label: "Software", href: "/store" },
+  { label: "eGift Cards", href: "/store" },
+  { label: "Eneba Gift Cards", href: "/store" },
+  { label: "Probably Stolen", href: "/store" },
+  { label: "FM27", href: "/store" },
+  { label: "GTA VI", href: "/store" },
 ]
 
 function SearchField() {
@@ -57,7 +58,7 @@ function Header({ navLinks = defaultNavLinks, className }: { navLinks?: NavLink[
           <SearchField />
         </div>
 
-        <Button variant="ghost" className="hidden xl:inline-flex xl:h-full xl:[&_svg]:size-header-icon!">
+        <Button variant="ghost" className="hidden hover:bg-transparent aria-expanded:bg-transparent xl:inline-flex xl:h-full xl:[&_svg]:size-header-icon!">
           English EU
           <Separator orientation="vertical" className="h-4 bg-foreground data-vertical:self-center" />
           EUR
@@ -99,7 +100,7 @@ function Header({ navLinks = defaultNavLinks, className }: { navLinks?: NavLink[
               key={link.label}
               variant="ghost"
               nativeButton={false}
-              render={<a href={link.href} />}
+              render={<Link to={link.href} />}
             >
               {link.label}
             </Button>

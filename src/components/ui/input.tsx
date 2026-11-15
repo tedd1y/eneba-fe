@@ -12,6 +12,8 @@ const inputVariants = cva(
         default: "border-input bg-transparent",
         /** Filled, borderless field on filter panels. */
         field: "border-transparent bg-field",
+        /** Dark recessed field inside panels (cart email, discount code). */
+        inset: "border-transparent bg-card",
       },
     },
     defaultVariants: { variant: "default" },

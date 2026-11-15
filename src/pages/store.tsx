@@ -9,6 +9,10 @@ import { ResultsCount, SortSelect } from '@/components/store/sort-select.tsx'
 import { StorePagination } from '@/components/store/store-pagination.tsx'
 import { useState } from 'react'
 import { type ActiveFilterGroup, ActiveFilters } from '@/components/store/active-filters.tsx'
+import {useQuery} from "@tanstack/react-query";
+import {v1ProductsIndexOptions} from "@/client/@tanstack/react-query.gen.ts";
+import type {ProductResource} from "@/client";
+import { ProductCard } from '@/components/product/product-card.tsx'
 
 type MultiKey = 'type' | 'os' | 'platform' | 'region'
 
@@ -21,8 +25,29 @@ const facets: Record<MultiKey, { label: string, options: typeof types }> = {
 
 const emptyMulti: Record<MultiKey, string[]> = { type: [], os: [], platform: [], region: [] }
 
+/** Maps an API product onto the `Product` shape <ProductCard> renders. */
+function toCardProps(p: ProductResource) {
+  return {
+    title: p.title,
+    platform: p.platform.label,
+    region: p.region.label,
+    regionTone: p.region.value === 'europe' ? 'eu' as const : 'alt' as const,
+    price: p.price.formatted,
+    oldPrice: p.original_price?.formatted,
+    discount: p.discount_percent > 0 ? `-${p.discount_percent}%` : undefined,
+    cashback: p.cashback?.formatted,
+    // ProductCard has no image slot yet; token gradient placeholder until it does.
+    cover: 'bg-linear-to-br from-surface-tile to-primary',
+  }
+}
+
 /** Every store control wired to one state object, the way the store page will use them. */
-function WiredStoreDemo() {
+function WiredStore() {
+
+  const { data, isLoading, isError } = useQuery(
+      v1ProductsIndexOptions({ query: { per_page: 20 } })
+  )
+
   const [price, setPrice] = useState<RangeValue>([null, null])
   const [country, setCountry] = useState<string | null>(null)
   const [multi, setMulti] = useState<Record<MultiKey, string[]>>({
@@ -86,18 +111,10 @@ function WiredStoreDemo() {
           <ResultsCount count={results} />
           <SortSelect options={sortOptions} value={sort} onValueChange={setSort} />
         </div>
-        <div className="grid min-h-48 place-items-center border border-dashed border-border p-6 text-center type-body text-muted-foreground">
-          Product grid · page
-          {' '}
-          {page}
-          {' '}
-          of
-          {' '}
-          {pageCount}
-          {' '}
-          · sorted by “
-          {sortOptions.find(s => s.value === sort)?.label}
-          ”
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          {data?.data.map(p => (
+            <ProductCard key={p.id} product={toCardProps(p)} offersHref={`/products/${p.slug}`} />
+          ))}
         </div>
         <StorePagination pageCount={pageCount} page={Math.min(page, pageCount)} onPageChange={setPage} />
       </div>
@@ -113,7 +130,7 @@ export function Store() {
         id="store"
         title="Store filters"
       >
-        <WiredStoreDemo />
+        <WiredStore />
       </Section>
     </div>
   )

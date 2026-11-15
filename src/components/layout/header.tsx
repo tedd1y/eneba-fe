@@ -57,13 +57,14 @@ function Header({ navLinks = defaultNavLinks, className }: { navLinks?: NavLink[
           <SearchField />
         </div>
 
-        <Button variant="ghost" className="hidden xl:inline-flex">
+        <Button variant="ghost" className="hidden xl:inline-flex xl:h-full xl:[&_svg]:size-header-icon!">
           English EU
           <Separator orientation="vertical" className="h-4 bg-foreground data-vertical:self-center" />
           EUR
         </Button>
 
-        <div className="ml-auto flex items-center gap-1">
+        {/* From tablet up, actions fill the bar's height and use larger icons. */}
+        <div className="ml-auto flex items-center gap-1 nav:h-full nav:items-stretch nav:gap-0 nav:[&_[data-slot=button]]:h-full nav:[&_[data-slot=button]_svg]:size-header-icon!">
           <Button variant="ghost" size="icon" aria-label="Search" className="nav:hidden">
             <SearchIcon />
           </Button>
@@ -76,17 +77,22 @@ function Header({ navLinks = defaultNavLinks, className }: { navLinks?: NavLink[
           <Button variant="ghost" size="icon" aria-label="Account" className="nav:hidden">
             <UserIcon />
           </Button>
-          <Button variant="ghost" className="hidden nav:inline-flex">
-            <UserIcon data-icon="inline-start" />
-            Log in
+          {/* Two separate actions; gold text on hover, no fill. */}
+          <div className="hidden items-center nav:flex">
+            <Button variant="ghost" className="px-2 hover:bg-transparent">
+              <UserIcon data-icon="inline-start" />
+              Log in
+            </Button>
             <Separator orientation="vertical" className="h-4 bg-foreground data-vertical:self-center" />
-            Register
-          </Button>
+            <Button variant="ghost" className="px-2 hover:bg-transparent">
+              Register
+            </Button>
+          </div>
         </div>
       </div>
 
       <nav aria-label="Main" className="hidden bg-surface-nav nav:block">
-        <div className="mx-auto flex h-header-nav max-w-page items-center gap-1 overflow-x-auto px-6">
+        <div className="mx-auto flex h-header-nav max-w-page items-stretch gap-0 overflow-clip px-6 [&_[data-slot=button],&_[data-slot=sheet-trigger]]:h-full [&_[data-slot=sheet-trigger]_svg,&_[data-slot=button]_svg]:size-header-icon!">
           <SideMenu />
           {navLinks.map((link) => (
             <Button

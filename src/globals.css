@@ -200,6 +200,7 @@
   --spacing-header-mobile: 3.4375rem; /* 55px — phone, single row */
   --spacing-header-bar: 6.0625rem; /* 97px — logo / search / actions row */
   --spacing-header-nav: 3.125rem; /* 50px — sub-header: menu + categories (bar + nav = 147px) */
+  --spacing-header-icon: 1.6rem;   /* 25.6px — header action icons from tablet up → size-header-icon */
   --spacing-page-top: 1.5625rem;     /* 25px — phone */
   --spacing-page-top-lg: 3.125rem;   /* 50px — desktop */
 

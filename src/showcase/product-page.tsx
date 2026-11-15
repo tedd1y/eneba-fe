@@ -1,14 +1,14 @@
 import { useState } from 'react'
 
-import { AlsoViewed } from '@/showcase/product/also-viewed'
-import { CheckoutTrustPanel, DealsSignup, FeaturedOfferPanel } from '@/showcase/product/buy-box'
-import { MediaStrip } from '@/showcase/product/media-strip'
-import { OfferList, OfferRow } from '@/showcase/product/offer-list'
-import { PriceTag } from '@/showcase/product/price-tag'
-import { DescriptionTabs, DetailSection, SpecList, SystemRequirements, TagList } from '@/showcase/product/product-details'
-import { ProductBreadcrumbs, ProductHero } from '@/showcase/product/product-hero'
-import { ReviewItem, ReviewList } from '@/showcase/product/reviews'
-import { StarRating } from '@/showcase/product/star-rating'
+import { AlsoViewed } from '@/components/product/also-viewed'
+import { CheckoutTrustPanel, DealsSignup, FeaturedOfferPanel } from '@/components/product/buy-box'
+import { MediaStrip } from '@/components/product/media-strip'
+import { OfferList, OfferRow } from '@/components/product/offer-list'
+import { PriceTag } from '@/components/product/price-tag'
+import { DescriptionTabs, DetailSection, SpecList, SystemRequirements, TagList } from '@/components/product/product-details'
+import { ProductBreadcrumbs, ProductHero } from '@/components/product/product-hero'
+import { ReviewItem, ReviewList } from '@/components/product/reviews'
+import { StarRating } from '@/components/product/star-rating'
 import {
   activationSteps,
   alsoViewed,

@@ -12,7 +12,7 @@ import type {
   RequirementSet,
   Review,
   SpecRow,
-} from '@/showcase/product/types'
+} from '@/components/product/types'
 
 /** Sample product page content for the styleguide. Covers are token gradients until real art exists. */
 export const product = {

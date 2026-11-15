@@ -17,6 +17,8 @@ const buttonVariants = cva(
           "border-border-strong bg-secondary text-secondary-foreground hover:border-attention hover:bg-secondary-hover aria-expanded:border-attention aria-expanded:bg-secondary-hover",
         /** Solid gold — purchase actions ("Add to cart"). */
         buy: "bg-attention text-attention-foreground hover:bg-attention/85",
+        /** White express-checkout button above "Buy now". */
+        light: "bg-light text-light-foreground hover:bg-light/85",
         /** Mint accent — cashback / wallet actions. */
         highlight:
           "bg-highlight text-highlight-foreground hover:bg-highlight/85",

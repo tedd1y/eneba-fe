@@ -5,6 +5,7 @@ import { Cards } from "@/showcase/cards"
 import { Foundations } from "@/showcase/foundations"
 import { Galleries } from "@/showcase/galleries"
 import { Navigation } from "@/showcase/navigation"
+import { ProductPage } from "@/showcase/product-page"
 import { Store } from "@/showcase/store"
 
 const sections = [
@@ -14,6 +15,7 @@ const sections = [
   { id: "galleries", label: "Galleries" },
   { id: "layout", label: "Header & side menu" },
   { id: "store", label: "Store filters" },
+  { id: "product", label: "Product page" },
 ]
 
 export function StyleguidePage() {
@@ -47,6 +49,7 @@ export function StyleguidePage() {
         <Galleries />
         <Navigation />
         <Store />
+        <ProductPage />
       </main>
 
       <footer className="bg-surface-footer py-8">

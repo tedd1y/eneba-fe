@@ -72,6 +72,13 @@
   --chip: #2c0e6c; /* active filter badges ("Type (1)") */
   --control: #cdbef0; /* checkbox outline */
 
+  /* Product page */
+  --rating: #fad318; /* filled review stars */
+  --rating-empty: #5f3fbf; /* unfilled review stars */
+  --positive: #23c299; /* verified seller tick, "+14" helpful votes, "Instant delivery" */
+  --light: #ffffff; /* white express-checkout button */
+  --light-foreground: #1f0a4d;
+
   /* Lines & states */
   --border: rgb(255 255 255 / 12%);
   --border-strong: #ffffff; /* search box, outline buttons */
@@ -144,6 +151,11 @@
   --color-field: var(--field);
   --color-chip: var(--chip);
   --color-control: var(--control);
+  --color-rating: var(--rating);
+  --color-rating-empty: var(--rating-empty);
+  --color-positive: var(--positive);
+  --color-light: var(--light);
+  --color-light-foreground: var(--light-foreground);
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
   --color-input: var(--input);
@@ -202,6 +214,11 @@
 
   /* Product card hover: height of the revealed button stack (2 × 40px + 8px gap + 16px bottom) */
   --spacing-card-actions: 6.5rem; /* 104px → -translate-y-card-actions */
+
+  /* Product page → w-buy-box, w-product-cover, w-media-thumb */
+  --spacing-buy-box: 21.875rem;     /* 350px — right column (featured offer, trust) */
+  --spacing-product-cover: 12.5rem; /* 200px — box art next to the title */
+  --spacing-media-thumb: 11rem;     /* 176px — screenshot / trailer thumbnails */
 }
 
 /*

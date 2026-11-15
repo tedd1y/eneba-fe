@@ -11,7 +11,9 @@ import type { CartLine } from './types'
 
 /**
  * One cart line: cover, "Sold by", title, note, quantity, price, cashback, wishlist + remove.
- * Desktop puts quantity and price on the note row; phone stacks them under the title.
+ * Lays out by its own width (container query), so it works in the cart page and the narrow cart popup:
+ * wide puts quantity and price on the note row; narrow stacks them under the title.
+ * The heart only shows when `onWishlist` is passed.
  */
 function CartItem({
   line,
@@ -32,56 +34,62 @@ function CartItem({
   const showImage = line.image && failedImage !== line.image
 
   return (
-    <article className={cn('flex gap-3 bg-card p-0 pr-5 max-sm:p-3 sm:gap-4', className)}>
-      {showImage
-        ? <img src={line.image} alt="" onError={() => setFailedImage(line.image)} className="aspect-[3/4] w-16 shrink-0 self-start object-cover sm:w-24" />
-        : <div className={cn('aspect-[3/4] w-16 shrink-0 self-start sm:w-24', line.cover)} aria-hidden />}
+    <article className={cn('@container bg-card', className)}>
+      <div className="flex gap-3 p-3 @md:gap-4 @md:p-0 @md:pr-5">
+        {showImage
+          ? <img src={line.image} alt="" onError={() => setFailedImage(line.image)} className="aspect-[3/4] w-16 shrink-0 self-start object-cover @md:w-24" />
+          : <div className={cn('aspect-[3/4] w-16 shrink-0 self-start @md:w-24', line.cover)} aria-hidden />}
 
-      <div className="flex min-w-0 flex-1 flex-col gap-2 sm:py-4">
-        <div className="flex items-start gap-3">
-          <div className="flex min-w-0 flex-1 flex-col gap-1">
-            <p className="flex min-w-0 items-center gap-2 type-label whitespace-nowrap">
-              Sold by
-              <span className="grid size-5 place-items-center rounded-full bg-surface-tile type-caption font-bold" aria-hidden>{line.seller.initials}</span>
-              <span className="truncate">{line.seller.name}</span>
-            </p>
-            <h3 className="type-card-title sm:type-h3 sm:text-base">{line.title}</h3>
+        <div className="flex min-w-0 flex-1 flex-col gap-2 @md:py-4">
+          <div className="flex items-start gap-3">
+            <div className="flex min-w-0 flex-1 flex-col gap-1">
+              <p className="flex min-w-0 items-center gap-2 type-label whitespace-nowrap">
+                Sold by
+                <span className="grid size-5 place-items-center rounded-full bg-surface-tile type-caption font-bold" aria-hidden>{line.seller.initials}</span>
+                <span className="truncate">{line.seller.name}</span>
+              </p>
+              <h3 className="type-card-title @md:type-h3 @md:text-base">{line.title}</h3>
+            </div>
+            <div className="flex shrink-0 items-center">
+              {onWishlist && (
+                <>
+                  <Button variant="ghost" size="icon-sm" aria-label="Move to wishlist" onClick={() => onWishlist(line)}>
+                    <HeartIcon />
+                  </Button>
+                  <Separator orientation="vertical" className="h-5 data-vertical:self-center" />
+                </>
+              )}
+              <Button variant="ghost" size="icon-sm" aria-label={`Remove ${line.title}`} onClick={() => onRemove?.(line)}>
+                <Trash2Icon />
+              </Button>
+            </div>
           </div>
-          <div className="flex shrink-0 items-center">
-            <Button variant="ghost" size="icon-sm" aria-label="Move to wishlist" onClick={() => onWishlist?.(line)}>
-              <HeartIcon />
-            </Button>
-            <Separator orientation="vertical" className="h-5 data-vertical:self-center" />
-            <Button variant="ghost" size="icon-sm" aria-label={`Remove ${line.title}`} onClick={() => onRemove?.(line)}>
-              <Trash2Icon />
-            </Button>
-          </div>
-        </div>
 
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-1">
-          {line.note && (
-            <p className="flex items-center gap-1 type-caption text-muted-foreground max-sm:basis-full">
-              {line.note}
-              <CircleHelpIcon className="size-3.5" aria-hidden />
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-1">
+            {line.note && (
+              <p className="flex items-center gap-1 type-caption text-muted-foreground @max-md:basis-full">
+                {line.note}
+                <CircleHelpIcon className="size-3.5" aria-hidden />
+              </p>
+            )}
+            <QuantityStepper
+              value={line.quantity}
+              max={maxQuantity}
+              onValueChange={q => onQuantityChange?.(line, q)}
+              label={`Quantity of ${line.title}`}
+              className="@md:ml-auto"
+            />
+            <p className="ml-auto min-w-16 text-right type-card-title font-bold @md:ml-0">{line.price}</p>
+          </div>
+
+          {line.cashback && (
+            <p className="type-caption text-cashback">
+              Cashback:
+              {' '}
+              {line.cashback}
             </p>
           )}
-          <QuantityStepper
-            value={line.quantity}
-            max={maxQuantity}
-            onValueChange={q => onQuantityChange?.(line, q)}
-            label={`Quantity of ${line.title}`}
-            className="sm:ml-auto"
-          />
-          <p className="ml-auto min-w-16 text-right type-card-title font-bold sm:ml-0">{line.price}</p>
         </div>
-
-        {line.cashback && (
-          <p className="type-caption text-cashback">
-            Cashback:
-            {' '}
-            {line.cashback}
-          </p>
-        )}
       </div>
     </article>
   )

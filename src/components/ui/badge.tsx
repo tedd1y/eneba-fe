@@ -22,6 +22,8 @@ const badgeVariants = cva(
         platform: "bg-overlay text-foreground",
         /** Gold counter next to a filter title ("Type ①"). */
         count: "size-5 rounded-full bg-attention p-0 type-caption font-bold text-attention-foreground",
+        /** Red bubble on the cart icon ("1"). */
+        notification: "h-5 min-w-5 rounded-full bg-notification px-1 type-caption font-bold text-notification-foreground",
         muted: "bg-muted text-muted-foreground",
         destructive: "bg-destructive text-foreground",
         ghost: "text-foreground hover:bg-secondary-hover",

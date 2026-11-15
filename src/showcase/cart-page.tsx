@@ -1,6 +1,8 @@
 import { useState } from 'react'
 
 import { formatMoney } from '@/lib/money'
+import { CartButton } from '@/components/cart/cart-button'
+import { Button } from '@/components/ui/button'
 import { CartItem, CartList } from '@/components/cart/cart-item'
 import { CartSummary, DiscountCode } from '@/components/cart/cart-summary'
 import { CheckoutHeader, CheckoutSteps } from '@/components/cart/checkout-header'
@@ -147,6 +149,37 @@ function CartPageDemo() {
   )
 }
 
+/** Header cart button wired to its own dummy cart: bubble count, popup quantities and removal stay in sync. */
+function CartButtonDemo() {
+  const [items, setItems] = useState(cartSeed.slice(0, 1))
+  const [status, setStatus] = useState('')
+
+  const total = items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0)
+  const cashback = items.reduce((sum, i) => sum + Math.round(i.unitPrice * i.quantity * i.cashbackPercent / 100), 0)
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-end gap-2 bg-background px-4 py-3">
+        <span className="mr-auto type-caption text-muted-foreground">
+          {status || 'Click the cart'}
+        </span>
+        <CartButton
+          lines={items.map(toLine)}
+          total={formatMoney(total)}
+          cashback={cashback ? formatMoney(cashback) : undefined}
+          onQuantityChange={(line, q) => setItems(list => list.map(i => (i.id === line.id ? { ...i, quantity: q } : i)))}
+          onRemove={line => setItems(list => list.filter(i => i.id !== line.id))}
+          onCheckout={() => setStatus(`Checkout now: ${formatMoney(total)}`)}
+        />
+      </div>
+      <div className="flex gap-4">
+        <Button variant="attention" size="text" onClick={() => setItems(cartSeed)}>Fill with 2 lines</Button>
+        <Button variant="attention" size="text" onClick={() => setItems([])}>Empty cart</Button>
+      </div>
+    </div>
+  )
+}
+
 export function CartPage() {
   return (
     <Section
@@ -156,6 +189,10 @@ export function CartPage() {
     >
       <Specimen title="Checkout header (resize for phone)">
         <CheckoutHeader steps={checkoutSteps} current={0} />
+      </Specimen>
+
+      <Specimen title="Cart button: count bubble + popup (design/brand/cart/cart_button, cart_popup)">
+        <CartButtonDemo />
       </Specimen>
 
       <CartPageDemo />

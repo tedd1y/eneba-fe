@@ -78,6 +78,8 @@
   --positive: #23c299; /* verified seller tick, "+14" helpful votes, "Instant delivery" */
   --light: #ffffff; /* white express-checkout button */
   --light-foreground: #1f0a4d;
+  --notification: #e5243b; /* cart count bubble */
+  --notification-foreground: #ffffff;
 
   /* Lines & states */
   --border: rgb(255 255 255 / 12%);
@@ -156,6 +158,8 @@
   --color-positive: var(--positive);
   --color-light: var(--light);
   --color-light-foreground: var(--light-foreground);
+  --color-notification: var(--notification);
+  --color-notification-foreground: var(--notification-foreground);
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
   --color-input: var(--input);

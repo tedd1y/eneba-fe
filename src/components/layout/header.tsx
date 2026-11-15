@@ -1,8 +1,12 @@
 import { cn } from '@/lib/utils'
-import { HeartIcon, SearchIcon, ShoppingCartIcon, UserIcon } from "lucide-react"
+import { HeartIcon, SearchIcon, UserIcon } from "lucide-react"
+import { useState } from "react"
 import { Link } from "react-router"
 
+import { CartButton } from "@/components/cart/cart-button"
 import { Logo } from "@/components/layout/logo"
+import { formatMoney } from "@/lib/money"
+import { cartSeed } from "@/showcase/cart-data"
 import { SideMenu } from "@/components/layout/side-menu"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,6 +23,37 @@ const defaultNavLinks: NavLink[] = [
   { label: "FM27", href: "/store" },
   { label: "GTA VI", href: "/store" },
 ]
+
+/**
+ * Cart icon + popup in the header. Dummy cart state for now (seeded from the styleguide data);
+ * swap for the real cart store when it exists.
+ */
+function HeaderCart() {
+  const [items, setItems] = useState(() => cartSeed.slice(0, 1))
+
+  const total = items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0)
+  const cashback = items.reduce((sum, i) => sum + Math.round(i.unitPrice * i.quantity * i.cashbackPercent / 100), 0)
+  const lines = items.map(i => ({
+    id: i.id,
+    title: i.title,
+    seller: i.seller,
+    cover: i.cover,
+    price: formatMoney(i.unitPrice * i.quantity),
+    cashback: formatMoney(Math.round(i.unitPrice * i.quantity * i.cashbackPercent / 100)),
+    quantity: i.quantity,
+    note: "Digital product",
+  }))
+
+  return (
+    <CartButton
+      lines={lines}
+      total={formatMoney(total)}
+      cashback={cashback ? formatMoney(cashback) : undefined}
+      onQuantityChange={(line, q) => setItems(list => list.map(i => (i.id === line.id ? { ...i, quantity: q } : i)))}
+      onRemove={line => setItems(list => list.filter(i => i.id !== line.id))}
+    />
+  )
+}
 
 function SearchField() {
   return (
@@ -72,9 +107,7 @@ function Header({ navLinks = defaultNavLinks, className }: { navLinks?: NavLink[
           <Button variant="ghost" size="icon" aria-label="Wishlist">
             <HeartIcon />
           </Button>
-          <Button variant="ghost" size="icon" aria-label="Cart" nativeButton={false} render={<Link to="/cart" />}>
-            <ShoppingCartIcon />
-          </Button>
+          <HeaderCart />
           <Button variant="ghost" size="icon" aria-label="Account" className="nav:hidden">
             <UserIcon />
           </Button>

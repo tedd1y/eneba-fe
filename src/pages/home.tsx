@@ -67,9 +67,8 @@ export function Home() {
           ]}
         />
 
-        <Block>
-          <QuickLinkStrip items={quickLinks} />
-        </Block>
+        {/* Full width, no Block; keeps the Block's top spacing below the hero. */}
+        <QuickLinkStrip items={quickLinks} className="pt-block nav:pt-block-lg" />
 
         <Block title="Recommended for you" info action="See all">
           <ProductRail>

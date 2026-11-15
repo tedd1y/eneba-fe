@@ -4,6 +4,9 @@ import { useParams } from 'react-router'
 
 import type { ProductDetailResource } from '@/client'
 import { v1ProductsShowOptions } from '@/client/@tanstack/react-query.gen.ts'
+import { v1ProductsShow } from '@/client/sdk.gen.ts'
+import { NotFound } from '@/components/layout/not-found'
+import { NotFoundError } from '@/lib/errors'
 import { AlsoViewed } from '@/components/product/also-viewed'
 import { CheckoutTrustPanel, DealsSignup, FeaturedOfferPanel } from '@/components/product/buy-box'
 import { MediaStrip } from '@/components/product/media-strip'
@@ -134,11 +137,20 @@ function toProductView(p: ProductDetailResource): ProductView {
  */
 export function Product() {
   const { slug = '' } = useParams()
-  const { data } = useQuery({
+  const { data, error } = useQuery({
     ...v1ProductsShowOptions({ path: { product: slug } }),
+    // Same key as the generated options, but keep the HTTP status so a 404 can show the not-found page.
+    queryFn: async ({ signal }) => {
+      const { data, error, response } = await v1ProductsShow({ path: { product: slug }, signal })
+      if (response?.status === 404) throw new NotFoundError(`No product "${slug}"`)
+      if (error || !data) throw error ?? new Error('Empty response')
+      return data
+    },
+    retry: (count, err) => !(err instanceof NotFoundError) && count < 1,
     enabled: slug !== '',
   })
 
+  if (error instanceof NotFoundError) return <NotFound />
   if (!data) return <main className="page-container page-main" aria-busy="true" />
 
   const product = toProductView(data.data)

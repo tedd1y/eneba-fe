@@ -193,6 +193,13 @@
 
 /* Elevation — Eneba is flat; only category tiles float. */
 @theme {
+  /* 404 ghosts bob up and down → animate-float */
+  --animate-float: float 4s ease-in-out infinite;
+  @keyframes float {
+    0%, 100% { translate: 0 0; }
+    50% { translate: 0 -0.75rem; }
+  }
+
   --shadow-xs: 0 0 #0000;
   --shadow-sm: 0 0 #0000;
   --shadow-lg: 0 8px 24px rgb(14 8 20 / 0.35);

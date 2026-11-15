@@ -251,6 +251,14 @@ export type ProductResource = {
 };
 
 /**
+ * ProductSort
+ *
+ * Sort order for the product listing. A leading `-` means descending.
+ *
+ */
+export type ProductSort = 'title' | '-title' | 'price' | '-price' | 'created_at' | '-created_at';
+
+/**
  * ProductType
  */
 export type ProductType = 'game' | 'dlc' | 'gift_card' | 'subscription' | 'in_game_currency';
@@ -288,6 +296,10 @@ export type V1ProductsIndexData = {
          * Maximum price in cents (inclusive). Must not be lower than `min_price`.
          */
         max_price?: number | null;
+        /**
+         * Sort order. Prefix with `-` for descending, e.g. `-price` is most expensive first and `-created_at` newest first.
+         */
+        sort?: ProductSort | null;
         /**
          * Number of products per page.
          */

@@ -1,18 +1,27 @@
 import { Section } from '@/showcase/section.tsx'
 import { FilterSection, FilterSidebar } from '@/components/store/filter-section.tsx'
 import { RangeFilter, type RangeValue } from '@/components/store/range-filter.tsx'
-import { sortOptions } from '@/showcase/store-data.ts'
 import { CheckboxFilter } from '@/components/store/checkbox-filter.tsx'
-import { ResultsCount, SortSelect } from '@/components/store/sort-select.tsx'
+import { ResultsCount, SortSelect, type SortOption } from '@/components/store/sort-select.tsx'
 import { StorePagination } from '@/components/store/store-pagination.tsx'
 import { useState } from 'react'
 import { type ActiveFilterGroup, ActiveFilters } from '@/components/store/active-filters.tsx'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { v1ProductsFiltersIndexOptions, v1ProductsIndexOptions } from '@/client/@tanstack/react-query.gen.ts'
-import type { FilterOptionResource, Platform, ProductResource, ProductType } from '@/client'
+import type { FilterOptionResource, Platform, ProductResource, ProductSort, ProductType } from '@/client'
 import type { FilterOption } from '@/components/store/types.ts'
 import { useDebouncedValue } from '@/lib/use-debounced-value.ts'
 import { ProductCard } from '@/components/product/product-card.tsx'
+
+/** Store sort menu → API `sort` param (leading `-` = descending). */
+const sortOptions: (SortOption & { value: ProductSort })[] = [
+  { value: 'price', label: 'Price: Low to High' },
+  { value: '-price', label: 'Price: High to Low' },
+  { value: 'created_at', label: 'Date: Oldest First' },
+  { value: '-created_at', label: 'Date: Newest First' },
+  { value: 'title', label: 'Alphabet: A-Z' },
+  { value: '-title', label: 'Alphabet: Z-A' },
+]
 
 type MultiKey = 'type' | 'platform'
 
@@ -47,7 +56,7 @@ function toCardProps(p: ProductResource) {
 function WiredStore() {
   const [price, setPrice] = useState<RangeValue>([null, null])
   const [multi, setMulti] = useState<Record<MultiKey, string[]>>(emptyMulti)
-  const [sort, setSort] = useState(sortOptions[0].value)
+  const [sort, setSort] = useState<ProductSort>(sortOptions[0].value)
   const [page, setPage] = useState(1)
 
   // Price is typed digit by digit; wait for a pause before refetching.
@@ -68,6 +77,7 @@ function WiredStore() {
         'platform[]': multi.platform as Platform[],
         'min_price': toCents(minPrice),
         'max_price': toCents(maxPrice),
+        sort,
       },
     }),
     // Keep the current page on screen while the next one loads.
@@ -125,7 +135,14 @@ function WiredStore() {
         />
         <div className="flex flex-wrap items-center justify-between gap-2">
           <ResultsCount count={results} />
-          <SortSelect options={sortOptions} value={sort} onValueChange={setSort} />
+          <SortSelect
+            options={sortOptions}
+            value={sort}
+            onValueChange={(value) => {
+              setSort(value as ProductSort)
+              setPage(1)
+            }}
+          />
         </div>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {data?.data.map(p => (

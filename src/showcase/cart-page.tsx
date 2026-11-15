@@ -1,14 +1,14 @@
 import { useState } from 'react'
 
 import { formatMoney } from '@/lib/money'
-import { CartItem, CartList } from '@/showcase/cart/cart-item'
-import { CartSummary, DiscountCode } from '@/showcase/cart/cart-summary'
-import { CheckoutHeader, CheckoutSteps } from '@/showcase/cart/checkout-header'
-import { DeliveryForm } from '@/showcase/cart/delivery-form'
-import { DonationPanel } from '@/showcase/cart/donation-panel'
-import { InspiredPicks } from '@/showcase/cart/inspired-picks'
-import { QuantityStepper } from '@/showcase/cart/quantity-stepper'
-import type { CartLine } from '@/showcase/cart/types'
+import { CartItem, CartList } from '@/components/cart/cart-item'
+import { CartSummary, DiscountCode } from '@/components/cart/cart-summary'
+import { CheckoutHeader, CheckoutSteps } from '@/components/cart/checkout-header'
+import { DeliveryForm } from '@/components/cart/delivery-form'
+import { DonationPanel } from '@/components/cart/donation-panel'
+import { InspiredPicks } from '@/components/cart/inspired-picks'
+import { QuantityStepper } from '@/components/cart/quantity-stepper'
+import type { CartLine } from '@/components/cart/types'
 import {
   type CartSeed,
   cartSeed,

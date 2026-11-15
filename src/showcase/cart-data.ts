@@ -1,7 +1,7 @@
 import type { Product } from '@/components/product/product-card'
-import type { DonationAmount } from '@/showcase/cart/donation-panel'
-import type { Consent } from '@/showcase/cart/cart-summary'
-import type { CheckoutStep } from '@/showcase/cart/types'
+import type { DonationAmount } from '@/components/cart/donation-panel'
+import type { Consent } from '@/components/cart/cart-summary'
+import type { CheckoutStep } from '@/components/cart/types'
 
 /** Sample cart for the styleguide. Prices in cents so the demo can total them. */
 export type CartSeed = {

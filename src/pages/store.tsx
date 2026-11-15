@@ -9,7 +9,7 @@ import { ResultsCount, SortSelect } from '@/components/store/sort-select.tsx'
 import { StorePagination } from '@/components/store/store-pagination.tsx'
 import { useState } from 'react'
 import { type ActiveFilterGroup, ActiveFilters } from '@/components/store/active-filters.tsx'
-import {useQuery} from "@tanstack/react-query";
+import {keepPreviousData, useQuery} from "@tanstack/react-query";
 import {v1ProductsIndexOptions} from "@/client/@tanstack/react-query.gen.ts";
 import type {ProductResource} from "@/client";
 import { ProductCard } from '@/components/product/product-card.tsx'
@@ -44,10 +44,6 @@ function toCardProps(p: ProductResource) {
 /** Every store control wired to one state object, the way the store page will use them. */
 function WiredStore() {
 
-  const { data, isLoading, isError } = useQuery(
-      v1ProductsIndexOptions({ query: { per_page: 20 } })
-  )
-
   const [price, setPrice] = useState<RangeValue>([null, null])
   const [country, setCountry] = useState<string | null>(null)
   const [multi, setMulti] = useState<Record<MultiKey, string[]>>({
@@ -57,6 +53,17 @@ function WiredStore() {
   })
   const [sort, setSort] = useState(sortOptions[0].value)
   const [page, setPage] = useState(1)
+
+  const { data, isLoading, isError } = useQuery({
+    ...v1ProductsIndexOptions({ query: { page, per_page: 20 } }),
+    // Keep the current page on screen while the next one loads.
+    placeholderData: keepPreviousData,
+  })
+
+  const goToPage = (next: number) => {
+    setPage(next)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   const setFacet = (key: MultiKey) => (value: string[]) => {
     setMulti(m => ({ ...m, [key]: value }))
@@ -70,10 +77,8 @@ function WiredStore() {
     value: multi[key],
   }))
 
-  // Fake result count that reacts to filters so the demo feels live.
-  const selectedCount = Object.values(multi).flat().length
-  const results = Math.max(12, 2449 - selectedCount * 137 - (country ? 400 : 0))
-  const pageCount = Math.ceil(results / 20)
+  const results = data?.meta.total ?? 0
+  const pageCount = data?.meta.last_page ?? 1
 
   return (
     <div className="grid gap-6 md:grid-cols-[14rem_1fr]">
@@ -116,7 +121,7 @@ function WiredStore() {
             <ProductCard key={p.id} product={toCardProps(p)} offersHref={`/products/${p.slug}`} />
           ))}
         </div>
-        <StorePagination pageCount={pageCount} page={Math.min(page, pageCount)} onPageChange={setPage} />
+        <StorePagination pageCount={pageCount} page={data?.meta.current_page ?? page} onPageChange={goToPage} />
       </div>
     </div>
   )

@@ -2,28 +2,32 @@ import { Header } from '@/components/layout/header.tsx'
 import { Section } from '@/showcase/section.tsx'
 import { FilterSection, FilterSidebar } from '@/components/store/filter-section.tsx'
 import { RangeFilter, type RangeValue } from '@/components/store/range-filter.tsx'
-import { ComboboxFilter } from '@/components/store/combobox-filter.tsx'
-import { countries, operatingSystems, platforms, regions, sortOptions, types } from '@/showcase/store-data.ts'
+import { sortOptions } from '@/showcase/store-data.ts'
 import { CheckboxFilter } from '@/components/store/checkbox-filter.tsx'
 import { ResultsCount, SortSelect } from '@/components/store/sort-select.tsx'
 import { StorePagination } from '@/components/store/store-pagination.tsx'
 import { useState } from 'react'
 import { type ActiveFilterGroup, ActiveFilters } from '@/components/store/active-filters.tsx'
-import {keepPreviousData, useQuery} from "@tanstack/react-query";
-import {v1ProductsIndexOptions} from "@/client/@tanstack/react-query.gen.ts";
-import type {ProductResource} from "@/client";
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { v1ProductsFiltersIndexOptions, v1ProductsIndexOptions } from '@/client/@tanstack/react-query.gen.ts'
+import type { FilterOptionResource, Platform, ProductResource, ProductType } from '@/client'
+import type { FilterOption } from '@/components/store/types.ts'
+import { useDebouncedValue } from '@/lib/use-debounced-value.ts'
 import { ProductCard } from '@/components/product/product-card.tsx'
 
-type MultiKey = 'type' | 'os' | 'platform' | 'region'
+type MultiKey = 'type' | 'platform'
 
-const facets: Record<MultiKey, { label: string, options: typeof types }> = {
-  type: { label: 'Type', options: types },
-  os: { label: 'Operating system', options: operatingSystems },
-  platform: { label: 'Platforms', options: platforms },
-  region: { label: 'Regions', options: regions },
+const facetLabels: Record<MultiKey, string> = { type: 'Type', platform: 'Platforms' }
+
+const emptyMulti: Record<MultiKey, string[]> = { type: [], platform: [] }
+
+/** Maps API filter options onto the `FilterOption` shape the store filters expect. */
+function toFilterOptions(options: FilterOptionResource[] = []): FilterOption[] {
+  return options.map(o => ({ value: o.value, label: o.label, count: o.count }))
 }
 
-const emptyMulti: Record<MultiKey, string[]> = { type: [], os: [], platform: [], region: [] }
+/** EUR from the range inputs → cents for the API; null stays "no limit". */
+const toCents = (eur: number | null) => (eur === null ? undefined : Math.round(eur * 100))
 
 /** Maps an API product onto the `Product` shape <ProductCard> renders. */
 function toCardProps(p: ProductResource) {
@@ -41,21 +45,32 @@ function toCardProps(p: ProductResource) {
   }
 }
 
-/** Every store control wired to one state object, the way the store page will use them. */
 function WiredStore() {
-
   const [price, setPrice] = useState<RangeValue>([null, null])
-  const [country, setCountry] = useState<string | null>(null)
-  const [multi, setMulti] = useState<Record<MultiKey, string[]>>({
-    ...emptyMulti,
-    type: ['game'],
-    region: ['global', 'europe', 'rest-of-the-world', 'emea', 'lithuania'],
-  })
+  const [multi, setMulti] = useState<Record<MultiKey, string[]>>(emptyMulti)
   const [sort, setSort] = useState(sortOptions[0].value)
   const [page, setPage] = useState(1)
 
+  // Price is typed digit by digit; wait for a pause before refetching.
+  const [minPrice, maxPrice] = useDebouncedValue(price)
+
+  const { data: filters } = useQuery(v1ProductsFiltersIndexOptions())
+  const typeOptions = toFilterOptions(filters?.data.types)
+  const platformOptions = toFilterOptions(filters?.data.platforms)
+  const priceMin = Math.floor((filters?.data.price.min?.amount ?? 0) / 100)
+  const priceMax = Math.ceil((filters?.data.price.max?.amount ?? 50000) / 100)
+
   const { data, isLoading, isError } = useQuery({
-    ...v1ProductsIndexOptions({ query: { page, per_page: 20 } }),
+    ...v1ProductsIndexOptions({
+      query: {
+        page,
+        'per_page': 20,
+        'type[]': multi.type as ProductType[],
+        'platform[]': multi.platform as Platform[],
+        'min_price': toCents(minPrice),
+        'max_price': toCents(maxPrice),
+      },
+    }),
     // Keep the current page on screen while the next one loads.
     placeholderData: keepPreviousData,
   })
@@ -70,10 +85,16 @@ function WiredStore() {
     setPage(1)
   }
 
-  const groups: ActiveFilterGroup[] = (Object.keys(facets) as MultiKey[]).map(key => ({
+  const setPriceRange = (value: RangeValue) => {
+    setPrice(value)
+    setPage(1)
+  }
+
+  const facetOptions: Record<MultiKey, FilterOption[]> = { type: typeOptions, platform: platformOptions }
+  const groups: ActiveFilterGroup[] = (Object.keys(facetLabels) as MultiKey[]).map(key => ({
     id: key,
-    label: facets[key].label,
-    options: facets[key].options,
+    label: facetLabels[key],
+    options: facetOptions[key],
     value: multi[key],
   }))
 
@@ -84,22 +105,13 @@ function WiredStore() {
     <div className="grid gap-6 md:grid-cols-[14rem_1fr]">
       <FilterSidebar>
         <FilterSection title="Price range (EUR)">
-          <RangeFilter min={0} max={500} value={price} onValueChange={setPrice} labels={['Minimum price', 'Maximum price']} />
-        </FilterSection>
-        <FilterSection title="Country">
-          <ComboboxFilter label="Country" placeholder="All countries" options={countries} value={country} onValueChange={setCountry} />
+          <RangeFilter min={priceMin} max={priceMax} value={price} onValueChange={setPriceRange} labels={['Minimum price', 'Maximum price']} />
         </FilterSection>
         <FilterSection title="Type" count={multi.type.length}>
-          <CheckboxFilter options={types} value={multi.type} onValueChange={setFacet('type')} />
-        </FilterSection>
-        <FilterSection title="Operating system" count={multi.os.length}>
-          <CheckboxFilter options={operatingSystems} value={multi.os} onValueChange={setFacet('os')} />
+          <CheckboxFilter options={typeOptions} value={multi.type} onValueChange={setFacet('type')} />
         </FilterSection>
         <FilterSection title="Platforms" count={multi.platform.length}>
-          <CheckboxFilter searchable searchLabel="Search platforms" options={platforms} value={multi.platform} onValueChange={setFacet('platform')} />
-        </FilterSection>
-        <FilterSection title="Regions" count={multi.region.length}>
-          <CheckboxFilter searchable searchLabel="Search regions" options={regions} value={multi.region} onValueChange={setFacet('region')} />
+          <CheckboxFilter searchable options={platformOptions} value={multi.platform} onValueChange={setFacet('platform')} />
         </FilterSection>
       </FilterSidebar>
 
@@ -133,7 +145,7 @@ export function Store() {
       <Header />
       <Section
         id="store"
-        title="Store filters"
+        title="Store"
       >
         <WiredStore />
       </Section>

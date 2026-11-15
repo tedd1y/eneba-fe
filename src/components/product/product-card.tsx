@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import {Link} from "react-router";
 
 export type Product = {
   title: string
@@ -103,8 +104,16 @@ function PriceBlock({ product }: { product: Product }) {
 }
 
 /**
- * Vertical card used in desktop/tablet rails.
- * On hover (or when a button inside has focus) the lower part slides up over the cover
+ * Invisible link stretched over the whole card, so a click anywhere opens the product page.
+ * Card content above it is pointer-events-none; buttons opt back in with pointer-events-auto.
+ */
+function CardLink({ to, label }: { to: string; label: string }) {
+  return <Link to={to} aria-label={label} className="absolute inset-0 z-0" />
+}
+
+/**
+ * Vertical card used in desktop/tablet rails. The whole card links to `offersHref`.
+ * On hover (or when a link/button inside has focus) the lower part slides up over the cover
  * and reveals "Add to cart" / "View offers". Labels and handlers come in as props.
  */
 function ProductCard({
@@ -123,9 +132,10 @@ function ProductCard({
   offersHref?: string
 }) {
   return (
-    <Card className={cn("h-full gap-0 py-0", className)}>
-      <Cover product={product} showBadges={false} className="aspect-[3/4]" />
-      <div className="relative flex flex-1 flex-col gap-2 bg-card pt-2 pb-4 transition-transform duration-300 ease-out group-hover/card:-translate-y-card-actions group-focus-within/card:-translate-y-card-actions motion-reduce:transition-none">
+    <Card className={cn("relative h-full gap-0 py-0", className)}>
+      <CardLink to={offersHref} label={product.title} />
+      <Cover product={product} showBadges={false} className="pointer-events-none aspect-[3/4]" />
+      <div className="pointer-events-none relative flex flex-1 flex-col gap-2 bg-card pt-2 pb-4 transition-transform duration-300 ease-out group-hover/card:-translate-y-card-actions group-focus-within/card:-translate-y-card-actions motion-reduce:transition-none">
         {/* Badges ride on top of the sliding panel so they stay visible on hover. */}
         <CoverBadges product={product} className="absolute inset-x-0 bottom-full" />
         <CardHeader>
@@ -135,11 +145,11 @@ function ProductCard({
         <CardFooter className="mt-auto">
           <PriceBlock product={product} />
         </CardFooter>
-        <div className="absolute inset-x-0 top-full flex h-card-actions flex-col gap-2 bg-card px-(--card-spacing)">
+        <div className="pointer-events-auto absolute inset-x-0 top-full flex h-card-actions flex-col gap-2 bg-card px-(--card-spacing)">
           <Button variant="buy" className="w-full" onClick={() => onAddToCart?.(product)}>
             {addToCartLabel}
           </Button>
-          <Button variant="secondary" className="w-full" nativeButton={false} render={<a href={offersHref} />}>
+          <Button variant="secondary" className="w-full" nativeButton={false} render={<Link to={offersHref} />}>
             {viewOffersLabel}
           </Button>
         </div>
@@ -148,24 +158,33 @@ function ProductCard({
   )
 }
 
-/** Horizontal list card used on phones. */
-function ProductCardRow({ product, className }: { product: Product; className?: string }) {
+/** Horizontal list card used on phones. The whole card links to `offersHref`. */
+function ProductCardRow({
+  product,
+  className,
+  offersHref = "#",
+}: {
+  product: Product
+  className?: string
+  offersHref?: string
+}) {
   return (
-    <Card className={cn("flex-row gap-0 p-4", className)}>
-      <Cover product={product} showCashback={false} className="aspect-square w-24 shrink-0" />
-      <div className="flex min-w-0 flex-1 flex-col gap-3">
+    <Card className={cn("relative flex-row gap-0 p-4", className)}>
+      <CardLink to={offersHref} label={product.title} />
+      <Cover product={product} showCashback={false} className="pointer-events-none aspect-square w-24 shrink-0" />
+      <div className="pointer-events-none relative flex min-w-0 flex-1 flex-col gap-3">
         <CardHeader className="pr-0">
           <CardTitle className="line-clamp-2">{product.title}</CardTitle>
           <Region product={product} />
           <CardAction>
-            <Button variant="ghost" size="icon-sm" aria-label="Add to wishlist">
+            <Button variant="ghost" size="icon-sm" aria-label="Add to wishlist" className="pointer-events-auto">
               <HeartIcon />
             </Button>
           </CardAction>
         </CardHeader>
         <CardContent className="mt-auto flex items-end justify-between gap-2 pr-0">
           <PriceBlock product={product} />
-          <Button variant="secondary" size="icon-lg" aria-label="Add to cart">
+          <Button variant="secondary" size="icon-lg" aria-label="Add to cart" className="pointer-events-auto">
             <ShoppingCartIcon />
           </Button>
         </CardContent>

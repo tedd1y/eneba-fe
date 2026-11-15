@@ -130,7 +130,7 @@ function WiredStore() {
         </div>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {data?.data.map(p => (
-            <ProductCard key={p.id} product={toCardProps(p)} offersHref={`/products/${p.slug}`} />
+            <ProductCard key={p.id} product={toCardProps(p)} offersHref={`/${p.slug}`} />
           ))}
         </div>
         <StorePagination pageCount={pageCount} page={data?.meta.current_page ?? page} onPageChange={goToPage} />

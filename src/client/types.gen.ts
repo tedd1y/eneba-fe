@@ -5,9 +5,80 @@ export type ClientOptions = {
 };
 
 /**
+ * FilterOptionResource
+ */
+export type FilterOptionResource = {
+    /**
+     * Value to send back in the matching `/v1/products` query parameter.
+     */
+    value: string;
+    /**
+     * Human-readable name.
+     */
+    label: string;
+    /**
+     * Number of active products matching this option.
+     */
+    count: number;
+};
+
+/**
  * Platform
  */
 export type Platform = 'steam' | 'epic_games' | 'gog' | 'ea_app' | 'ubisoft_connect' | 'battle_net' | 'xbox' | 'playstation' | 'nintendo';
+
+/**
+ * ProductFilterOptionsResource
+ */
+export type ProductFilterOptionsResource = {
+    /**
+     * Every platform, in a fixed order, including those with no products.
+     */
+    platforms: Array<FilterOptionResource>;
+    /**
+     * Every region, in a fixed order, including those with no products.
+     */
+    regions: Array<FilterOptionResource>;
+    /**
+     * Every product type, in a fixed order, including those with no products.
+     */
+    types: Array<FilterOptionResource>;
+    /**
+     * Price range of active products. Both bounds are null when there are no active products.
+     */
+    price: {
+        /**
+         * Lowest price among active products.
+         */
+        min: {
+            /**
+             * Amount in minor units (cents).
+             */
+            amount: number;
+            /**
+             * Amount formatted for display in the given currency.
+             */
+            formatted: string;
+        } | null;
+        /**
+         * Highest price among active products.
+         */
+        max: {
+            /**
+             * Amount in minor units (cents).
+             */
+            amount: number;
+            /**
+             * Amount formatted for display in the given currency.
+             */
+            formatted: string;
+        } | null;
+    };
+    /**
+     * ISO 4217 currency code for the price range.
+     */
+    currency: string;
+};
 
 /**
  * ProductResource
@@ -49,7 +120,7 @@ export type ProductResource = {
          */
         amount: number;
         /**
-         * Amount formatted for display in the product currency.
+         * Amount formatted for display in the given currency.
          */
         formatted: string;
     };
@@ -60,9 +131,9 @@ export type ProductResource = {
         /**
          * Amount in minor units (cents).
          */
-        amount: number | null;
+        amount: number;
         /**
-         * Amount formatted for display in the product currency.
+         * Amount formatted for display in the given currency.
          */
         formatted: string;
     } | null;
@@ -73,9 +144,9 @@ export type ProductResource = {
         /**
          * Amount in minor units (cents).
          */
-        amount: number | null;
+        amount: number;
         /**
-         * Amount formatted for display in the product currency.
+         * Amount formatted for display in the given currency.
          */
         formatted: string;
     } | null;
@@ -93,6 +164,11 @@ export type ProductResource = {
 };
 
 /**
+ * ProductType
+ */
+export type ProductType = 'game' | 'dlc' | 'gift_card' | 'subscription' | 'in_game_currency';
+
+/**
  * Region
  */
 export type Region = 'global' | 'europe' | 'north_america' | 'united_kingdom' | 'latin_america' | 'asia';
@@ -106,13 +182,25 @@ export type V1ProductsIndexData = {
          */
         search?: string | null;
         /**
-         * Only return products for this platform.
+         * Only return products for any of these platforms. A single value is also accepted. Repeat the parameter to match several (`platform[]=a&platform[]=b`).
          */
-        platform?: Platform | null;
+        'platform[]'?: Array<Platform> | null;
         /**
-         * Only return products for this region.
+         * Only return products for any of these regions. A single value is also accepted. Repeat the parameter to match several (`region[]=a&region[]=b`).
          */
-        region?: Region | null;
+        'region[]'?: Array<Region> | null;
+        /**
+         * Only return products of any of these types. A single value is also accepted. Repeat the parameter to match several (`type[]=a&type[]=b`).
+         */
+        'type[]'?: Array<ProductType> | null;
+        /**
+         * Minimum price in cents (inclusive).
+         */
+        min_price?: number | null;
+        /**
+         * Maximum price in cents (inclusive). Must not be lower than `min_price`.
+         */
+        max_price?: number | null;
         /**
          * Number of products per page.
          */
@@ -227,3 +315,21 @@ export type V1ProductsShowResponses = {
 };
 
 export type V1ProductsShowResponse = V1ProductsShowResponses[keyof V1ProductsShowResponses];
+
+export type V1ProductsFiltersIndexData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/products/filters';
+};
+
+export type V1ProductsFiltersIndexResponses = {
+    /**
+     * `ProductFilterOptionsResource`
+     */
+    200: {
+        data: ProductFilterOptionsResource;
+    };
+};
+
+export type V1ProductsFiltersIndexResponse = V1ProductsFiltersIndexResponses[keyof V1ProductsFiltersIndexResponses];

@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { V1ProductsIndexData, V1ProductsIndexErrors, V1ProductsIndexResponses, V1ProductsShowData, V1ProductsShowErrors, V1ProductsShowResponses } from './types.gen';
+import type { V1ProductsFiltersIndexData, V1ProductsFiltersIndexResponses, V1ProductsIndexData, V1ProductsIndexErrors, V1ProductsIndexResponses, V1ProductsShowData, V1ProductsShowErrors, V1ProductsShowResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -27,3 +27,11 @@ export const v1ProductsIndex = <ThrowOnError extends boolean = false>(options?: 
  * Display the specified product
  */
 export const v1ProductsShow = <ThrowOnError extends boolean = false>(options: Options<V1ProductsShowData, ThrowOnError>): RequestResult<V1ProductsShowResponses, V1ProductsShowErrors, ThrowOnError> => (options.client ?? client).get<V1ProductsShowResponses, V1ProductsShowErrors, ThrowOnError>({ url: '/v1/products/{product}', ...options });
+
+/**
+ * List product filter options with counts
+ *
+ * Returns every platform, region and product type with the number of active products
+ * matching each, plus the min/max price of active products in cents.
+ */
+export const v1ProductsFiltersIndex = <ThrowOnError extends boolean = false>(options?: Options<V1ProductsFiltersIndexData, ThrowOnError>): RequestResult<V1ProductsFiltersIndexResponses, unknown, ThrowOnError> => (options?.client ?? client).get<V1ProductsFiltersIndexResponses, unknown, ThrowOnError>({ url: '/v1/products/filters', ...options });

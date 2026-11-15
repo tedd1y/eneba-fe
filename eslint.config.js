@@ -8,7 +8,7 @@ import eslintConfigPrettier from "eslint-config-prettier";
 import stylistic from '@stylistic/eslint-plugin'
 
 export default defineConfig([
-  globalIgnores(['dist', '.agents', '.claude']),
+  globalIgnores(['dist', '.agents', '.claude', 'src/client']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

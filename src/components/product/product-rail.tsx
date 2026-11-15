@@ -23,7 +23,8 @@ function ProductRail({
       <CarouselContent className="-ml-4">
         {children.map((child, i) => (
           <CarouselItem key={i} className="basis-1/2 pl-4 sm:basis-1/3 lg:basis-1/5">
-            {child}
+            {/* 1px inset so the card's outer ring isn't clipped by the carousel's overflow-hidden viewport. */}
+            <div className="h-full p-px">{child}</div>
           </CarouselItem>
         ))}
       </CarouselContent>

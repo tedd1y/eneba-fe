@@ -72,7 +72,7 @@ function Header({ navLinks = defaultNavLinks, className }: { navLinks?: NavLink[
           <Button variant="ghost" size="icon" aria-label="Wishlist">
             <HeartIcon />
           </Button>
-          <Button variant="ghost" size="icon" aria-label="Cart">
+          <Button variant="ghost" size="icon" aria-label="Cart" nativeButton={false} render={<Link to="/cart" />}>
             <ShoppingCartIcon />
           </Button>
           <Button variant="ghost" size="icon" aria-label="Account" className="nav:hidden">

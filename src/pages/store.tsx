@@ -1,5 +1,6 @@
 import { Section } from '@/showcase/section.tsx'
 import { FilterSection, FilterSidebar } from '@/components/store/filter-section.tsx'
+import { FilterSheet } from '@/components/store/filter-sheet.tsx'
 import { RangeFilter, type RangeValue } from '@/components/store/range-filter.tsx'
 import { CheckboxFilter } from '@/components/store/checkbox-filter.tsx'
 import { ComboboxFilter } from '@/components/store/combobox-filter.tsx'
@@ -12,6 +13,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { v1ProductsFiltersIndexOptions, v1ProductsIndexOptions } from '@/client/@tanstack/react-query.gen.ts'
 import type { FilterOptionResource, ProductResource, ProductSort } from '@/client'
 import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
 import { toProductsQuery, useStoreParams } from '@/lib/store-params'
 import type { FilterOption } from '@/components/store/types.ts'
 import { useDebouncedValue } from '@/lib/use-debounced-value.ts'
@@ -125,71 +127,101 @@ function WiredStore() {
   const results = data?.meta.total ?? 0
   const pageCount = data?.meta.last_page ?? 1
 
+  const clearAll = () => void setParams({ drms: null, regions: null, types: null, genres: null, os: null, country: null, priceMin: null, priceMax: null, search: null, page: null })
+  const setSort = (value: string) => void setParams({ sort: value as ProductSort, page: null })
+  // "Sort and filter (n)": how many filter groups are in use (each facet, price, country).
+  const activeCount = groups.filter(g => g.value.length > 0).length
+    + (params.priceMin !== null || params.priceMax !== null ? 1 : 0)
+    + (params.country ? 1 : 0)
+  const hasChips = groups.some(g => g.value.length > 0) || Boolean(params.search || params.country)
+
+  // Same sections in the desktop sidebar and the tablet/phone sheet.
+  const filterSections = (
+    <>
+      <FilterSection title="Price range (EUR)">
+        <RangeFilter min={priceMin} max={priceMax} value={price} onValueChange={setPrice} labels={['Minimum price', 'Maximum price']} />
+      </FilterSection>
+      <FilterSection title="Country">
+        <ComboboxFilter
+          label="Country"
+          placeholder="All countries"
+          options={countryOptions}
+          value={params.country}
+          onValueChange={country => void setParams({ country, page: null })}
+        />
+      </FilterSection>
+      <FilterSection title="Type" count={params.types.length}>
+        <CheckboxFilter options={facetOptions.types} value={params.types} onValueChange={setFacet('types')} />
+      </FilterSection>
+      <FilterSection title="Operating system" count={params.os.length}>
+        <CheckboxFilter options={facetOptions.os} value={params.os} onValueChange={setFacet('os')} />
+      </FilterSection>
+      <FilterSection title="Platforms" count={params.drms.length}>
+        <CheckboxFilter searchable searchLabel="Search platforms" options={facetOptions.drms} value={params.drms} onValueChange={setFacet('drms')} />
+      </FilterSection>
+      <FilterSection title="Genres" count={params.genres.length}>
+        <CheckboxFilter searchable searchLabel="Search genres" options={facetOptions.genres} value={params.genres} onValueChange={setFacet('genres')} />
+      </FilterSection>
+      <FilterSection title="Regions" count={params.regions.length}>
+        <CheckboxFilter searchable searchLabel="Search regions" options={facetOptions.regions} value={params.regions} onValueChange={setFacet('regions')} />
+      </FilterSection>
+    </>
+  )
+
   return (
-    <div className="grid gap-6 md:grid-cols-[14rem_1fr]">
-      <FilterSidebar>
-        <FilterSection title="Price range (EUR)">
-          <RangeFilter min={priceMin} max={priceMax} value={price} onValueChange={setPrice} labels={['Minimum price', 'Maximum price']} />
-        </FilterSection>
-        <FilterSection title="Country">
-          <ComboboxFilter
-            label="Country"
-            placeholder="All countries"
-            options={countryOptions}
-            value={params.country}
-            onValueChange={country => void setParams({ country, page: null })}
-          />
-        </FilterSection>
-        <FilterSection title="Type" count={params.types.length}>
-          <CheckboxFilter options={facetOptions.types} value={params.types} onValueChange={setFacet('types')} />
-        </FilterSection>
-        <FilterSection title="Operating system" count={params.os.length}>
-          <CheckboxFilter options={facetOptions.os} value={params.os} onValueChange={setFacet('os')} />
-        </FilterSection>
-        <FilterSection title="Platforms" count={params.drms.length}>
-          <CheckboxFilter searchable searchLabel="Search platforms" options={facetOptions.drms} value={params.drms} onValueChange={setFacet('drms')} />
-        </FilterSection>
-        <FilterSection title="Genres" count={params.genres.length}>
-          <CheckboxFilter searchable searchLabel="Search genres" options={facetOptions.genres} value={params.genres} onValueChange={setFacet('genres')} />
-        </FilterSection>
-        <FilterSection title="Regions" count={params.regions.length}>
-          <CheckboxFilter searchable searchLabel="Search regions" options={facetOptions.regions} value={params.regions} onValueChange={setFacet('regions')} />
-        </FilterSection>
-      </FilterSidebar>
+    <div className="grid gap-6 nav:grid-cols-[14rem_1fr]">
+      {/* Desktop: sidebar. Tablet / phone: the "Sort and filter" sheet below. */}
+      <FilterSidebar className="max-nav:hidden">{filterSections}</FilterSidebar>
 
       <div className="flex min-w-0 flex-col gap-6">
-        <ActiveFilters
-          groups={groups}
-          onValueChange={(id, value) => setFacet(id as FacetKey)(value)}
-          onClearAll={() => void setParams({ drms: null, regions: null, types: null, genres: null, os: null, country: null, priceMin: null, priceMax: null, search: null, page: null })}
-          extra={(params.search || params.country) && (
-            <>
-              {params.country && (
-                <Button variant="chip" size="sm" aria-label={`Remove country ${countryLabel}`} onClick={() => void setParams({ country: null, page: null })}>
-                  Country:
-                  {' '}
-                  {countryLabel}
-                  <XIcon data-icon="inline-end" />
-                </Button>
-              )}
-              {params.search && (
-                <Button variant="chip" size="sm" aria-label={`Remove search "${params.search}"`} onClick={() => void setParams({ search: null, page: null })}>
-                  Search: “
-                  {params.search}
-                  ”
-                  <XIcon data-icon="inline-end" />
-                </Button>
-              )}
-            </>
-          )}
-        />
+        {/* Tablet / phone: one row that scrolls sideways, like the reference. */}
+        <div className="flex items-center gap-4 max-nav:-mx-4 max-nav:overflow-x-auto max-nav:px-4 max-nav:[scrollbar-width:none] nav:flex-wrap [&_button]:shrink-0">
+          <div className="flex shrink-0 items-center gap-4 nav:hidden">
+            <FilterSheet
+              activeCount={activeCount}
+              sortOptions={sortOptions}
+              sort={params.sort}
+              onSortChange={setSort}
+              resultsCount={results}
+              onClearAll={clearAll}
+            >
+              {filterSections}
+            </FilterSheet>
+            {hasChips && <Separator orientation="vertical" className="h-8 bg-foreground/60 data-vertical:self-center" />}
+          </div>
+          <ActiveFilters
+            className="max-nav:flex-nowrap"
+            groups={groups}
+            onValueChange={(id, value) => setFacet(id as FacetKey)(value)}
+            onClearAll={clearAll}
+            extra={(params.search || params.country) && (
+              <>
+                {params.country && (
+                  <Button variant="chip" size="sm" aria-label={`Remove country ${countryLabel}`} onClick={() => void setParams({ country: null, page: null })}>
+                    Country:
+                    {' '}
+                    {countryLabel}
+                    <XIcon data-icon="inline-end" />
+                  </Button>
+                )}
+                {params.search && (
+                  <Button variant="chip" size="sm" aria-label={`Remove search "${params.search}"`} onClick={() => void setParams({ search: null, page: null })}>
+                    Search: “
+                    {params.search}
+                    ”
+                    <XIcon data-icon="inline-end" />
+                  </Button>
+                )}
+              </>
+            )}
+          />
+        </div>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <ResultsCount count={results} />
-          <SortSelect
-            options={sortOptions}
-            value={params.sort}
-            onValueChange={value => void setParams({ sort: value as ProductSort, page: null })}
-          />
+          {/* Tablet / phone sort from the sheet instead. */}
+          <div className="max-nav:hidden">
+            <SortSelect options={sortOptions} value={params.sort} onValueChange={setSort} />
+          </div>
         </div>
         {/* Phone: one column of horizontal row cards. Tablet and up: the vertical card grid. */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-4">

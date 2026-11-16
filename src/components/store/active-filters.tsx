@@ -4,6 +4,7 @@ import type { FilterOption } from '@/components/store/types'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { cn } from '@/lib/utils'
 
 export type ActiveFilterGroup = {
   id: string
@@ -23,6 +24,7 @@ function ActiveFilters({
   onClearAll,
   clearLabel = 'Clear all',
   extra,
+  className,
 }: {
   groups: ActiveFilterGroup[]
   onValueChange: (groupId: string, value: string[]) => void
@@ -30,12 +32,13 @@ function ActiveFilters({
   clearLabel?: string
   /** Extra chips shown before the groups (e.g. the search term). */
   extra?: React.ReactNode
+  className?: string
 }) {
   const active = groups.filter(g => g.value.length > 0)
   if (active.length === 0 && !extra) return null
 
   return (
-    <div className="flex flex-wrap items-center gap-4">
+    <div className={cn('flex flex-wrap items-center gap-4', className)}>
       {extra}
       {active.map(group => (
         <Popover key={group.id}>

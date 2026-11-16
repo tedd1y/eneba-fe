@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { CircleCheckIcon, Gamepad2Icon, HandCoinsIcon, KeyRoundIcon } from 'lucide-react'
-import { useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 
 import type { ProductDetailResource } from '@/client'
 import { v1ProductsShowOptions } from '@/client/@tanstack/react-query.gen.ts'
@@ -27,6 +27,7 @@ import type {
   SpecRow,
 } from '@/components/product/types'
 import type { Product as CardProduct } from '@/components/product/product-card'
+import { useCartStore } from '@/stores/cart'
 
 /** Site-wide payment methods; not product data. */
 const paymentMethods = ['Wallet', 'Visa', 'PayPal', 'Swedbank', 'SEB', 'Luminor', 'Revolut', 'Artea', 'LKU', 'Apple Pay', 'Google Pay', 'Citadele', 'Crypto']
@@ -137,6 +138,8 @@ function toProductView(p: ProductDetailResource): ProductView {
  */
 export function Product() {
   const { slug = '' } = useParams()
+  const navigate = useNavigate()
+  const addToCart = useCartStore(s => s.add)
   const { data, error } = useQuery({
     ...v1ProductsShowOptions({ path: { product: slug } }),
     // Same key as the generated options, but keep the HTTP status so a 404 can show the not-found page.
@@ -154,6 +157,11 @@ export function Product() {
   if (!data) return <main className="page-container page-main" aria-busy="true" />
 
   const product = toProductView(data.data)
+  // "Buy now": put the product in the cart and go straight there (no "Added to cart" modal).
+  const buyNow = () => {
+    addToCart(data.data.id, { notify: false })
+    void navigate('/cart')
+  }
 
   return (
     <main className="flex page-container page-main flex-col gap-6 pb-block-lg">
@@ -171,7 +179,7 @@ export function Product() {
         />
 
         <aside className="flex flex-col gap-2 lg:col-start-2 lg:row-span-2 lg:row-start-1">
-          <FeaturedOfferPanel offer={product.offer} />
+          <FeaturedOfferPanel offer={product.offer} onBuy={buyNow} />
           <CheckoutTrustPanel paymentMethods={paymentMethods} trustScore="100/100" />
           <DealsSignup />
         </aside>
@@ -179,10 +187,10 @@ export function Product() {
         <div className="flex min-w-0 flex-col gap-12 lg:col-start-1">
           {product.media.length > 0 && <MediaStrip items={product.media} />}
           {product.recommendedOffers.length > 0 && (
-            <OfferList title="Recommended offers" offers={product.recommendedOffers} />
+            <OfferList title="Recommended offers" offers={product.recommendedOffers} onBuy={buyNow} />
           )}
           {product.otherOffers.length > 0 && (
-            <OfferList id="offers" title="other offers" highlightCount offers={product.otherOffers} initialCount={3} />
+            <OfferList id="offers" title="other offers" highlightCount offers={product.otherOffers} initialCount={3} onBuy={buyNow} />
           )}
 
           {product.alsoViewed.length > 0 && (

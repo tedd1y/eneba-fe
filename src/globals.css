@@ -189,6 +189,7 @@
   --radius-4xl: var(--radius);
 
   --container-page: 77.5rem; /* max content width */
+  --container-checkout: 62.5rem; /* payment page: methods + summary */
 }
 
 /* Elevation — Eneba is flat; only category tiles float. */
@@ -231,6 +232,9 @@
   --spacing-buy-box: 21.875rem;     /* 350px — right column (featured offer, trust) */
   --spacing-product-cover: 12.5rem; /* 200px — box art next to the title */
   --spacing-media-thumb: 11rem;     /* 176px — screenshot / trailer thumbnails */
+
+  /* Payment page → w-payment-summary */
+  --spacing-payment-summary: 27.8125rem; /* 445px — order summary column */
 }
 
 /*

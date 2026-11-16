@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router'
 
 import { formatMoney } from '@/lib/money'
 import { CartItem, CartList } from '@/components/cart/cart-item'
@@ -30,6 +31,7 @@ function CartPage() {
   const items = useCartStore(s => s.items)
   const setQuantity = useCartStore(s => s.setQuantity)
   const remove = useCartStore(s => s.remove)
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [emailTouched, setEmailTouched] = useState(false)
   const [remember, setRemember] = useState(false)
@@ -114,7 +116,8 @@ function CartPage() {
             checkoutDisabled={count === 0}
             onCheckout={() => {
               setEmailTouched(true)
-              setStatus(EMAIL_RE.test(email) ? `Checkout: ${formatMoney(total, currency)} to ${email}` : 'Email is required to checkout')
+              if (EMAIL_RE.test(email)) navigate('/payment')
+              else setStatus('Email is required to checkout')
             }}
             discount={(
               <DiscountCode

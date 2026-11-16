@@ -16,8 +16,11 @@ export const CART_LIMIT_MESSAGE = `Your cart is full. You can have up to ${MAX_C
 
 type CartState = {
   items: CartItem[]
-  /** Adds one product. Returns false (and adds nothing) if the line or the cart is already full. */
-  add: (productId: number) => boolean
+  /**
+   * Adds one product. Returns false (and adds nothing) if the line or the cart is already full.
+   * Opens the "Added to cart" modal unless `notify: false` (e.g. "Buy now", which goes straight to the cart).
+   */
+  add: (productId: number, options?: { notify?: boolean }) => boolean
   remove: (productId: number) => void
   /** Sets a line's quantity, capped by the line and cart limits; 0 or less removes it. */
   setQuantity: (productId: number, quantity: number) => void
@@ -39,19 +42,18 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       items: [],
 
-      add: (productId) => {
+      add: (productId, { notify = true } = {}) => {
         const { items } = get()
         const existing = items.find(i => i.productId === productId)
         if (countOf(items) >= MAX_CART_ITEMS || (existing && existing.quantity >= MAX_QUANTITY)) {
-          set({ addedOpen: true, addFailed: true })
+          if (notify) set({ addedOpen: true, addFailed: true })
           return false
         }
         set({
           items: existing
             ? items.map(i => (i.productId === productId ? { ...i, quantity: i.quantity + 1 } : i))
             : [...items, { productId, quantity: 1 }],
-          addedOpen: true,
-          addFailed: false,
+          ...(notify && { addedOpen: true, addFailed: false }),
         })
         return true
       },

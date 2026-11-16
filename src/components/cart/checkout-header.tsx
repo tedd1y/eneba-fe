@@ -1,4 +1,4 @@
-import { CheckIcon } from 'lucide-react'
+import { ArrowLeftIcon, CheckIcon } from 'lucide-react'
 import { Fragment } from 'react'
 import { Link } from 'react-router'
 
@@ -47,23 +47,32 @@ function CheckoutSteps({ steps, current, className }: { steps: CheckoutStep[], c
 
 /**
  * Minimal header for the checkout flow: logo, step progress, locale.
- * On phones it collapses to the logo mark and the current step's name.
+ * On phones it collapses to the logo mark and the current step's name; with `backHref`,
+ * the logo is swapped for a back arrow ("← Payment").
  */
 function CheckoutHeader({
   steps,
   current,
   homeHref = '/',
+  backHref,
   className,
 }: {
   steps: CheckoutStep[]
   current: number
   homeHref?: string
+  /** Phone only: show a back arrow to this page instead of the logo. */
+  backHref?: string
   className?: string
 }) {
   return (
     <header className={cn('bg-surface-nav', className)}>
       <div className="mx-auto flex h-header-mobile max-w-page items-center gap-4 px-4 sm:h-header-bar sm:gap-10 sm:px-8">
-        <Link to={homeHref} aria-label="Eneba home" className="shrink-0">
+        {backHref && (
+          <Link to={backHref} aria-label="Back" className="-ml-1 shrink-0 p-1 sm:hidden">
+            <ArrowLeftIcon className="size-5" aria-hidden />
+          </Link>
+        )}
+        <Link to={homeHref} aria-label="Eneba home" className={cn('shrink-0', backHref && 'max-sm:hidden')}>
           <Logo className="h-8 sm:h-12" />
         </Link>
         <p className="type-h3 font-bold sm:hidden">{steps[current]?.label}</p>

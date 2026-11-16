@@ -1,23 +1,31 @@
 import {
+  ChessKnightIcon,
+  CogIcon,
   CompassIcon,
   CreditCardIcon,
   CrosshairIcon,
   DollarSignIcon,
+  FlagIcon,
   Gamepad2Icon,
   GhostIcon,
   GiftIcon,
+  GlobeIcon,
+  type LucideIcon,
   MonitorIcon,
+  ScrollIcon,
   SmartphoneIcon,
-  SwordsIcon,
+  SwordIcon,
+  TentIcon,
   TrophyIcon,
   TvIcon,
-  WandSparklesIcon,
-  ZapIcon,
+  UsersIcon,
+  VolleyballIcon,
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 
-import type { HomeGalleryResource } from '@/client'
-import { v1HomeGalleriesIndexOptions, v1ProductsIndexOptions } from '@/client/@tanstack/react-query.gen'
+import type { FilterOptionResource, HomeGalleryResource } from '@/client'
+import { v1HomeGalleriesIndexOptions, v1ProductsFiltersIndexOptions, v1ProductsIndexOptions } from '@/client/@tanstack/react-query.gen'
 
 import { Block, type BlockTone } from '@/components/layout/block'
 import { BrandTile } from '@/components/product/brand-tile'
@@ -28,7 +36,7 @@ import { ProductRail } from '@/components/product/product-rail'
 import { QuickLinkStrip, type QuickLinkItem } from '@/components/product/quick-link'
 import { Button } from '@/components/ui/button'
 import { toCardProps } from '@/lib/product-card'
-import { storeHrefToProductsQuery } from '@/lib/store-params'
+import { serializeStoreParams, storeHrefToProductsQuery } from '@/lib/store-params'
 import { useCartStore } from '@/stores/cart'
 
 const quickLinks: QuickLinkItem[] = [
@@ -44,15 +52,61 @@ const quickLinks: QuickLinkItem[] = [
 
 const brands = ['Razer Gold', 'iTunes', 'Amazon', 'Google Play', 'Netflix', 'Spotify']
 
-const categories = [
-  { icon: ZapIcon, label: 'Action', count: 20699 },
-  { icon: CompassIcon, label: 'Adventure', count: 19950 },
-  { icon: Gamepad2Icon, label: 'Simulation', count: 15649 },
-  { icon: SwordsIcon, label: 'Strategy', count: 14912 },
-  { icon: WandSparklesIcon, label: 'RPG', count: 5605 },
-  { icon: GhostIcon, label: 'Indie', count: 5397 },
-  { icon: CrosshairIcon, label: 'FPS / TPS', count: 2820 },
-]
+/**
+ * Genre from /v1/products/filters. The API also sends `icon`,
+ * which its OpenAPI spec doesn't document yet, so it's typed here.
+ */
+type Genre = FilterOptionResource & { icon?: string | null }
+
+/** API icon name → Lucide icon. Unknown names and `null` fall back to the gamepad. */
+const genreIcons: Record<string, LucideIcon> = {
+  sword: SwordIcon,
+  compass: CompassIcon,
+  scroll: ScrollIcon,
+  crosshair: CrosshairIcon,
+  chess: ChessKnightIcon,
+  gear: CogIcon,
+  ball: VolleyballIcon,
+  flag: FlagIcon,
+  globe: GlobeIcon,
+  tent: TentIcon,
+  ghost: GhostIcon,
+  users: UsersIcon,
+}
+const DEFAULT_GENRE_ICON = Gamepad2Icon
+
+/** Genres shown before "Load more": one row on desktop. */
+const COLLAPSED_GENRES = 7
+
+/**
+ * "Categories": every genre, most products first. One row shows until "Load more" reveals the rest.
+ * Each tile opens the store filtered by that genre.
+ */
+function CategoriesBlock({ tone }: { tone: BlockTone }) {
+  const [showAll, setShowAll] = useState(false)
+  const { data } = useQuery(v1ProductsFiltersIndexOptions())
+  const genres: Genre[] = (data?.data.genres ?? []).toSorted((a, b) => b.count - a.count)
+  if (genres.length === 0) return null
+
+  const shown = showAll ? genres : genres.slice(0, COLLAPSED_GENRES)
+  const hasMore = shown.length < genres.length
+
+  return (
+    <Block tone={tone} title="Categories" action={hasMore ? 'Load more' : undefined} onAction={() => setShowAll(true)}>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7">
+        {shown.map(genre => (
+          <CategoryTile
+            key={genre.value}
+            icon={(genre.icon && genreIcons[genre.icon]) || DEFAULT_GENRE_ICON}
+            label={genre.label}
+            count={genre.count}
+            href={`/store/all${serializeStoreParams({ genres: [genre.value] })}`}
+          />
+        ))}
+      </div>
+    </Block>
+  )
+}
 
 /**
  * One product rail from /v1/home/galleries: the first `limit` products of the gallery's store link,
@@ -113,13 +167,7 @@ export function Home() {
           </div>
         </Block>
 
-        <Block tone={toneAt(rails.length + 1)} title="Categories" action="Load more">
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7">
-            {categories.map(category => (
-              <CategoryTile key={category.label} {...category} />
-            ))}
-          </div>
-        </Block>
+        <CategoriesBlock tone={toneAt(rails.length + 1)} />
       </main>
     </div>
   )

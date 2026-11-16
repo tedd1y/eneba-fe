@@ -22,6 +22,7 @@ function Block({
   info = false,
   action,
   actionHref = '#',
+  onAction,
   children,
   className,
 }: {
@@ -32,6 +33,8 @@ function Block({
   /** Label of the centered button under the content: "See all", "Load more"… */
   action?: string
   actionHref?: string
+  /** Makes the action a button (e.g. "Load more") instead of a link to `actionHref`. */
+  onAction?: () => void
   children: React.ReactNode
   className?: string
 }) {
@@ -47,14 +50,18 @@ function Block({
         {children}
         {action && (
           <div className="flex justify-center">
-            <Button
-              variant="secondary"
-              size="wide"
-              nativeButton={false}
-              render={<Link to={actionHref} />}
-            >
-              {action}
-            </Button>
+            {onAction
+              ? <Button variant="secondary" size="wide" onClick={onAction}>{action}</Button>
+              : (
+                  <Button
+                    variant="secondary"
+                    size="wide"
+                    nativeButton={false}
+                    render={<Link to={actionHref} />}
+                  >
+                    {action}
+                  </Button>
+                )}
           </div>
         )}
       </div>

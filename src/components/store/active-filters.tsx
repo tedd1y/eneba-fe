@@ -22,17 +22,21 @@ function ActiveFilters({
   onValueChange,
   onClearAll,
   clearLabel = 'Clear all',
+  extra,
 }: {
   groups: ActiveFilterGroup[]
   onValueChange: (groupId: string, value: string[]) => void
   onClearAll: () => void
   clearLabel?: string
+  /** Extra chips shown before the groups (e.g. the search term). */
+  extra?: React.ReactNode
 }) {
   const active = groups.filter(g => g.value.length > 0)
-  if (active.length === 0) return null
+  if (active.length === 0 && !extra) return null
 
   return (
     <div className="flex flex-wrap items-center gap-4">
+      {extra}
       {active.map(group => (
         <Popover key={group.id}>
           <PopoverTrigger render={<Button variant="chip" size="sm" />}>

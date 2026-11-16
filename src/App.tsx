@@ -1,4 +1,5 @@
-import { BrowserRouter, Outlet, Route, Routes } from 'react-router'
+import { NuqsAdapter } from 'nuqs/adapters/react-router/v8'
+import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router'
 
 import { AddedToCartModal } from '@/components/cart/added-to-cart-modal'
 import { Header } from '@/components/layout/header'
@@ -23,6 +24,12 @@ function CartAddedModalHost() {
   return <AddedToCartModal open={open} onOpenChange={setOpen} count={count} failed={failed} failedMessage={limitMessage(count)} />
 }
 
+/** `/store` → `/store/all`, keeping any query string (filters in a shared link survive). */
+function StoreRedirect() {
+  const { search } = useLocation()
+  return <Navigate to={{ pathname: '/store/all', search }} replace />
+}
+
 /** Shared shell for storefront pages: the header stays pinned to the top while the page scrolls. */
 function SiteLayout() {
   return (
@@ -36,16 +43,21 @@ function SiteLayout() {
 function App() {
   return (
     <BrowserRouter>
-      <CartAddedModalHost />
-      <Routes>
-        <Route path="/styleguide" element={<StyleguidePage />} />
-        <Route element={<SiteLayout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/store" element={<Store />} />
-          <Route path="/:slug" element={<Product />} />
-        </Route>
-        <Route path="/cart" element={<Cart />} />
-      </Routes>
+      {/* nuqs keeps store filters in the URL; must sit inside the router. */}
+      <NuqsAdapter>
+        <CartAddedModalHost />
+        <Routes>
+          <Route path="/styleguide" element={<StyleguidePage />} />
+          <Route element={<SiteLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/store" element={<StoreRedirect />} />
+            {/* "all" = no category filter; other categories are accepted but not filtered yet (no API). */}
+            <Route path="/store/:category" element={<Store />} />
+            <Route path="/:slug" element={<Product />} />
+          </Route>
+          <Route path="/cart" element={<Cart />} />
+        </Routes>
+      </NuqsAdapter>
     </BrowserRouter>
   )
 }

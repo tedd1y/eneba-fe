@@ -1,10 +1,13 @@
 import { cn } from '@/lib/utils'
 import { HeartIcon, SearchIcon, UserIcon } from "lucide-react"
-import { Link } from "react-router"
+import { useQueryState } from "nuqs"
+import { useState } from "react"
+import { Link, useLocation, useNavigate } from "react-router"
 
 import { CartButton } from "@/components/cart/cart-button"
 import { Logo } from "@/components/layout/logo"
 import { formatMoney } from "@/lib/money"
+import { storeParsers, storeSearchUrl } from "@/lib/store-params"
 import { CART_LIMIT_MESSAGE, MAX_CART_ITEMS, maxQuantityFor, selectCartCount, useCartStore } from "@/stores/cart"
 import { toCartLine, useCartProducts } from "@/stores/use-cart-products"
 import { SideMenu } from "@/components/layout/side-menu"
@@ -46,20 +49,49 @@ function HeaderCart() {
   )
 }
 
+/**
+ * Header search. Submitting goes to the store with `search` set, keeping the current store filters
+ * when already on the store. Shows the URL's search term while on the store.
+ */
 function SearchField() {
+  const { pathname } = useLocation()
+  const navigate = useNavigate()
+  // Read via nuqs: it updates the URL optimistically, ahead of react-router's location.
+  const [urlSearch] = useQueryState('search', storeParsers.search)
+  const urlTerm = pathname.startsWith('/store/') ? urlSearch : ''
+
+  const [term, setTerm] = useState(urlTerm)
+  // Follow the URL (chip removed, back/forward) without an effect.
+  const [shownUrlTerm, setShownUrlTerm] = useState(urlTerm)
+  if (shownUrlTerm !== urlTerm) {
+    setShownUrlTerm(urlTerm)
+    setTerm(urlTerm)
+  }
+
   return (
-    <div className="relative w-full">
+    <form
+      role="search"
+      className="relative w-full"
+      onSubmit={(e) => {
+        e.preventDefault()
+        // window.location is always current, including filters nuqs just wrote.
+        navigate(storeSearchUrl(term.trim(), window.location))
+      }}
+    >
       <SearchIcon
         className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-placeholder"
         aria-hidden
       />
       <Input
         type="search"
+        name="search"
+        value={term}
+        onChange={e => setTerm(e.target.value)}
         placeholder="Search for games, top-ups and more"
         aria-label="Search"
         className="h-14 pl-12"
       />
-    </div>
+    </form>
   )
 }
 

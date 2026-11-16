@@ -4,11 +4,14 @@ import { RangeFilter, type RangeValue } from '@/components/store/range-filter.ts
 import { CheckboxFilter } from '@/components/store/checkbox-filter.tsx'
 import { ResultsCount, SortSelect, type SortOption } from '@/components/store/sort-select.tsx'
 import { StorePagination } from '@/components/store/store-pagination.tsx'
-import { useState } from 'react'
+import { XIcon } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { type ActiveFilterGroup, ActiveFilters } from '@/components/store/active-filters.tsx'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { v1ProductsFiltersIndexOptions, v1ProductsIndexOptions } from '@/client/@tanstack/react-query.gen.ts'
-import type { FilterOptionResource, Platform, ProductResource, ProductSort, ProductType } from '@/client'
+import type { FilterOptionResource, ProductResource, ProductSort } from '@/client'
+import { Button } from '@/components/ui/button'
+import { toProductsQuery, useStoreParams } from '@/lib/store-params'
 import type { FilterOption } from '@/components/store/types.ts'
 import { useDebouncedValue } from '@/lib/use-debounced-value.ts'
 import { ProductCard } from '@/components/product/product-card.tsx'
@@ -24,19 +27,15 @@ const sortOptions: (SortOption & { value: ProductSort })[] = [
   { value: '-title', label: 'Alphabet: Z-A' },
 ]
 
-type MultiKey = 'type' | 'platform'
+/** Checkbox facets; the keys are the URL param names (see lib/store-params). */
+type FacetKey = 'types' | 'drms' | 'regions'
 
-const facetLabels: Record<MultiKey, string> = { type: 'Type', platform: 'Platforms' }
-
-const emptyMulti: Record<MultiKey, string[]> = { type: [], platform: [] }
+const facetLabels: Record<FacetKey, string> = { types: 'Type', drms: 'Platforms', regions: 'Regions' }
 
 /** Maps API filter options onto the `FilterOption` shape the store filters expect. */
 function toFilterOptions(options: FilterOptionResource[] = []): FilterOption[] {
   return options.map(o => ({ value: o.value, label: o.label, count: o.count }))
 }
-
-/** EUR from the range inputs → cents for the API; null stays "no limit". */
-const toCents = (eur: number | null) => (eur === null ? undefined : Math.round(eur * 100))
 
 /** Maps an API product onto the `Product` shape <ProductCard> renders. */
 function toCardProps(p: ProductResource) {
@@ -54,59 +53,61 @@ function toCardProps(p: ProductResource) {
   }
 }
 
+/**
+ * Store listing. All filter state lives in the URL (lib/store-params), so links, reloads and
+ * back/forward restore the same filters and results. Filter, search and sort changes reset to page 1.
+ */
 function WiredStore() {
   const addToCart = useCartStore(s => s.add)
-  const [price, setPrice] = useState<RangeValue>([null, null])
-  const [multi, setMulti] = useState<Record<MultiKey, string[]>>(emptyMulti)
-  const [sort, setSort] = useState<ProductSort>(sortOptions[0].value)
-  const [page, setPage] = useState(1)
+  const [params, setParams] = useStoreParams()
 
-  // Price is typed digit by digit; wait for a pause before refetching.
-  const [minPrice, maxPrice] = useDebouncedValue(price)
+  // Price inputs update locally while typing; the URL (and API) follow after a pause.
+  const [price, setPrice] = useState<RangeValue>([params.priceMin, params.priceMax])
+  const debouncedPrice = useDebouncedValue(price)
+  useEffect(() => {
+    const [min, max] = debouncedPrice
+    if (min !== params.priceMin || max !== params.priceMax) void setParams({ priceMin: min, priceMax: max, page: null })
+    // Only react to the user's typing, not to URL changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedPrice])
+  // URL changed from elsewhere (back/forward, "Clear all", a pasted link): show it in the inputs.
+  // Adjusting state during render on a prop change, per https://react.dev/learn/you-might-not-need-an-effect
+  const [urlPrice, setUrlPrice] = useState<RangeValue>([params.priceMin, params.priceMax])
+  if (urlPrice[0] !== params.priceMin || urlPrice[1] !== params.priceMax) {
+    setUrlPrice([params.priceMin, params.priceMax])
+    setPrice([params.priceMin, params.priceMax])
+  }
 
   const { data: filters } = useQuery(v1ProductsFiltersIndexOptions())
-  const typeOptions = toFilterOptions(filters?.data.types)
-  const platformOptions = toFilterOptions(filters?.data.platforms)
+  const facetOptions: Record<FacetKey, FilterOption[]> = {
+    types: toFilterOptions(filters?.data.types),
+    drms: toFilterOptions(filters?.data.platforms),
+    regions: toFilterOptions(filters?.data.regions),
+  }
   const priceMin = Math.floor((filters?.data.price.min?.amount ?? 0) / 100)
   const priceMax = Math.ceil((filters?.data.price.max?.amount ?? 50000) / 100)
 
-  const { data, isLoading, isError } = useQuery({
-    ...v1ProductsIndexOptions({
-      query: {
-        page,
-        'per_page': 20,
-        'type[]': multi.type as ProductType[],
-        'platform[]': multi.platform as Platform[],
-        'min_price': toCents(minPrice),
-        'max_price': toCents(maxPrice),
-        sort,
-      },
-    }),
+  const { data } = useQuery({
+    ...v1ProductsIndexOptions({ query: toProductsQuery(params) }),
     // Keep the current page on screen while the next one loads.
     placeholderData: keepPreviousData,
   })
 
   const goToPage = (next: number) => {
-    setPage(next)
+    void setParams({ page: next })
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const setFacet = (key: MultiKey) => (value: string[]) => {
-    setMulti(m => ({ ...m, [key]: value }))
-    setPage(1)
+  const setFacet = (key: FacetKey) => (value: string[]) => {
+    // Values come from the API's own option lists; the URL parser re-validates them on read.
+    void setParams({ [key]: value, page: null } as Parameters<typeof setParams>[0])
   }
 
-  const setPriceRange = (value: RangeValue) => {
-    setPrice(value)
-    setPage(1)
-  }
-
-  const facetOptions: Record<MultiKey, FilterOption[]> = { type: typeOptions, platform: platformOptions }
-  const groups: ActiveFilterGroup[] = (Object.keys(facetLabels) as MultiKey[]).map(key => ({
+  const groups: ActiveFilterGroup[] = (Object.keys(facetLabels) as FacetKey[]).map(key => ({
     id: key,
     label: facetLabels[key],
     options: facetOptions[key],
-    value: multi[key],
+    value: params[key],
   }))
 
   const results = data?.meta.total ?? 0
@@ -116,34 +117,39 @@ function WiredStore() {
     <div className="grid gap-6 md:grid-cols-[14rem_1fr]">
       <FilterSidebar>
         <FilterSection title="Price range (EUR)">
-          <RangeFilter min={priceMin} max={priceMax} value={price} onValueChange={setPriceRange} labels={['Minimum price', 'Maximum price']} />
+          <RangeFilter min={priceMin} max={priceMax} value={price} onValueChange={setPrice} labels={['Minimum price', 'Maximum price']} />
         </FilterSection>
-        <FilterSection title="Type" count={multi.type.length}>
-          <CheckboxFilter options={typeOptions} value={multi.type} onValueChange={setFacet('type')} />
+        <FilterSection title="Type" count={params.types.length}>
+          <CheckboxFilter options={facetOptions.types} value={params.types} onValueChange={setFacet('types')} />
         </FilterSection>
-        <FilterSection title="Platforms" count={multi.platform.length}>
-          <CheckboxFilter searchable options={platformOptions} value={multi.platform} onValueChange={setFacet('platform')} />
+        <FilterSection title="Platforms" count={params.drms.length}>
+          <CheckboxFilter searchable searchLabel="Search platforms" options={facetOptions.drms} value={params.drms} onValueChange={setFacet('drms')} />
+        </FilterSection>
+        <FilterSection title="Regions" count={params.regions.length}>
+          <CheckboxFilter searchable searchLabel="Search regions" options={facetOptions.regions} value={params.regions} onValueChange={setFacet('regions')} />
         </FilterSection>
       </FilterSidebar>
 
       <div className="flex min-w-0 flex-col gap-6">
         <ActiveFilters
           groups={groups}
-          onValueChange={(id, value) => setFacet(id as MultiKey)(value)}
-          onClearAll={() => {
-            setMulti(emptyMulti)
-            setPage(1)
-          }}
+          onValueChange={(id, value) => setFacet(id as FacetKey)(value)}
+          onClearAll={() => void setParams({ drms: null, regions: null, types: null, priceMin: null, priceMax: null, search: null, page: null })}
+          extra={params.search && (
+            <Button variant="chip" size="sm" aria-label={`Remove search "${params.search}"`} onClick={() => void setParams({ search: null, page: null })}>
+              Search: “
+              {params.search}
+              ”
+              <XIcon data-icon="inline-end" />
+            </Button>
+          )}
         />
         <div className="flex flex-wrap items-center justify-between gap-2">
           <ResultsCount count={results} />
           <SortSelect
             options={sortOptions}
-            value={sort}
-            onValueChange={(value) => {
-              setSort(value as ProductSort)
-              setPage(1)
-            }}
+            value={params.sort}
+            onValueChange={value => void setParams({ sort: value as ProductSort, page: null })}
           />
         </div>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
@@ -151,7 +157,7 @@ function WiredStore() {
             <ProductCard key={p.id} product={toCardProps(p)} offersHref={`/${p.slug}`} onAddToCart={() => addToCart(p.id)} />
           ))}
         </div>
-        <StorePagination pageCount={pageCount} page={data?.meta.current_page ?? page} onPageChange={goToPage} />
+        <StorePagination pageCount={pageCount} page={data?.meta.current_page ?? params.page} onPageChange={goToPage} />
       </div>
     </div>
   )

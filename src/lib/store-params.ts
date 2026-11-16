@@ -8,33 +8,31 @@ import {
   useQueryStates,
 } from 'nuqs'
 
-import type { Platform, ProductSort, ProductType, Region, V1ProductsIndexData } from '@/client'
+import type { ProductSort, V1ProductsIndexData } from '@/client'
 
 /**
  * Store filters ⇄ URL ⇄ API, all in one place.
  *
- *   /store/all?drms[]=steam&types[]=game&types[]=dlc&regions[]=europe
- *             &price_min=10&price_max=50&sort=-price&page=2&search=elden
+ *   /store/all?drms[]=steam&types[]=game&types[]=dlc&regions[]=europe&genres[]=rpg&os[]=windows
+ *             &country=lt&price_min=10&price_max=50&sort=-price&page=2&search=elden
  *
  * Arrays use repeated bracketed keys. Defaults (no filters, sort=price, page 1, empty search)
- * are left out of the URL. `os[]` is parsed and kept in the URL but not sent to the API yet.
+ * are left out of the URL. Filter values are database slugs, passed through as plain strings.
  */
 
-// Allowed values mirror the API enums; unknown values in a URL are dropped instead of causing a 422.
-const PLATFORMS = ['steam', 'epic_games', 'gog', 'ea_app', 'ubisoft_connect', 'battle_net', 'xbox', 'playstation', 'nintendo'] as const satisfies readonly Platform[]
-const REGIONS = ['global', 'europe', 'north_america', 'united_kingdom', 'latin_america', 'asia'] as const satisfies readonly Region[]
-const TYPES = ['game', 'dlc', 'gift_card', 'subscription', 'in_game_currency'] as const satisfies readonly ProductType[]
 export const SORTS = ['price', '-price', 'created_at', '-created_at', 'title', '-title'] as const satisfies readonly ProductSort[]
 
 export const DEFAULT_SORT: ProductSort = 'price'
 export const PAGE_SIZE = 20
 
 export const storeParsers = {
-  drms: parseAsNativeArrayOf(parseAsStringLiteral(PLATFORMS)),
-  regions: parseAsNativeArrayOf(parseAsStringLiteral(REGIONS)),
-  types: parseAsNativeArrayOf(parseAsStringLiteral(TYPES)),
-  /** Reserved: operating system filter, not wired to the API yet. */
+  drms: parseAsNativeArrayOf(parseAsString),
+  regions: parseAsNativeArrayOf(parseAsString),
+  types: parseAsNativeArrayOf(parseAsString),
+  genres: parseAsNativeArrayOf(parseAsString),
   os: parseAsNativeArrayOf(parseAsString),
+  /** ISO 3166-1 alpha-2 code: products that can be activated in this country. */
+  country: parseAsString,
   /** Euros. */
   priceMin: parseAsFloat,
   /** Euros. */
@@ -44,11 +42,12 @@ export const storeParsers = {
   search: parseAsString.withDefault(''),
 }
 
-/** State key → URL key. Keys not listed use their own name (sort, page, search). */
+/** State key → URL key. Keys not listed use their own name (country, sort, page, search). */
 export const storeUrlKeys = {
   drms: 'drms[]',
   regions: 'regions[]',
   types: 'types[]',
+  genres: 'genres[]',
   os: 'os[]',
   priceMin: 'price_min',
   priceMax: 'price_max',
@@ -75,6 +74,9 @@ export function toProductsQuery(params: StoreParams): NonNullable<V1ProductsInde
     'platform[]': orUndefined(params.drms),
     'region[]': orUndefined(params.regions),
     'type[]': orUndefined(params.types),
+    'genre[]': orUndefined(params.genres),
+    'os[]': orUndefined(params.os),
+    'country': params.country || undefined,
     'min_price': toCents(params.priceMin),
     'max_price': toCents(params.priceMax),
     'sort': params.sort,

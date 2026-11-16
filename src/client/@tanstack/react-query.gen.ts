@@ -119,7 +119,7 @@ export const v1ProductsIndexInfiniteOptions = (options?: Options<V1ProductsIndex
 export const v1ProductsShowQueryKey = (options: Options<V1ProductsShowData>) => createQueryKey('v1ProductsShow', options);
 
 /**
- * Display the specified product, including its description
+ * Display the specified product, including its description, genres and operating systems
  */
 export const v1ProductsShowOptions = (options: Options<V1ProductsShowData>) => queryOptions<V1ProductsShowResponse, V1ProductsShowError, V1ProductsShowResponse, ReturnType<typeof v1ProductsShowQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
@@ -139,8 +139,8 @@ export const v1ProductsFiltersIndexQueryKey = (options?: Options<V1ProductsFilte
 /**
  * List product filter options with counts
  *
- * Returns every platform, region and product type with the number of active products
- * matching each, plus the min/max price of active products in cents.
+ * Returns every platform, region, country, product type, genre and operating system with the number
+ * of active products matching each, plus the min/max price of active products in cents.
  */
 export const v1ProductsFiltersIndexOptions = (options?: Options<V1ProductsFiltersIndexData>) => queryOptions<V1ProductsFiltersIndexResponse, DefaultError, V1ProductsFiltersIndexResponse, ReturnType<typeof v1ProductsFiltersIndexQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {

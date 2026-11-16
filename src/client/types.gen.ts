@@ -5,6 +5,32 @@ export type ClientOptions = {
 };
 
 /**
+ * FeaturedFilterOptionResource
+ */
+export type FeaturedFilterOptionResource = {
+    /**
+     * Value to send back in the matching `/v1/products` query parameter.
+     */
+    value: string;
+    /**
+     * Human-readable name.
+     */
+    label: string;
+    /**
+     * Number of active products matching this option.
+     */
+    count: number;
+    /**
+     * Icon key for the frontend's icon set, or null when there is none.
+     */
+    icon: string | null;
+    /**
+     * Whether to highlight this option, e.g. as a quick filter.
+     */
+    is_featured: boolean;
+};
+
+/**
  * FilterOptionResource
  */
 export type FilterOptionResource = {
@@ -23,9 +49,18 @@ export type FilterOptionResource = {
 };
 
 /**
- * Platform
+ * LookupResource
  */
-export type Platform = 'steam' | 'epic_games' | 'gog' | 'ea_app' | 'ubisoft_connect' | 'battle_net' | 'xbox' | 'playstation' | 'nintendo';
+export type LookupResource = {
+    /**
+     * Slug, the same value the `/v1/products` filters accept.
+     */
+    value: string;
+    /**
+     * Human-readable name.
+     */
+    label: string;
+};
 
 /**
  * ProductDetailResource
@@ -40,24 +75,15 @@ export type ProductDetailResource = {
     /**
      * Platform the key activates on.
      */
-    platform: {
-        value: 'steam' | 'epic_games' | 'gog' | 'ea_app' | 'ubisoft_connect' | 'battle_net' | 'xbox' | 'playstation' | 'nintendo';
-        label: 'Steam' | 'Epic Games' | 'GOG' | 'EA App' | 'Ubisoft Connect' | 'Battle.net' | 'Xbox' | 'PlayStation' | 'Nintendo';
-    };
+    platform: LookupResource;
     /**
      * Region the key can be activated in.
      */
-    region: {
-        value: 'global' | 'europe' | 'north_america' | 'united_kingdom' | 'latin_america' | 'asia';
-        label: 'Global' | 'Europe' | 'North America' | 'United Kingdom' | 'Latin America' | 'Asia';
-    };
+    region: LookupResource;
     /**
      * Kind of product.
      */
-    type: {
-        value: 'game' | 'dlc' | 'gift_card' | 'subscription' | 'in_game_currency';
-        label: 'Game' | 'DLC' | 'Gift Card' | 'Subscription' | 'In-Game Currency';
-    };
+    type: LookupResource;
     /**
      * Current selling price.
      */
@@ -112,6 +138,14 @@ export type ProductDetailResource = {
      * Long-form product description as plain text. Paragraphs are separated by blank lines.
      */
     description: string | null;
+    /**
+     * Genres the product belongs to, in display order.
+     */
+    genres: Array<LookupResource>;
+    /**
+     * Operating systems the product runs on, in display order. Empty for console products.
+     */
+    operating_systems: Array<LookupResource>;
 };
 
 /**
@@ -119,17 +153,29 @@ export type ProductDetailResource = {
  */
 export type ProductFilterOptionsResource = {
     /**
-     * Every platform, in a fixed order, including those with no products.
+     * Every platform in display order, including those with no products.
      */
-    platforms: Array<FilterOptionResource>;
+    platforms: Array<FeaturedFilterOptionResource>;
     /**
-     * Every region, in a fixed order, including those with no products.
+     * Every region in display order, including those with no products.
      */
     regions: Array<FilterOptionResource>;
     /**
-     * Every product type, in a fixed order, including those with no products.
+     * Every country in display order, counting active products whose region includes it.
      */
-    types: Array<FilterOptionResource>;
+    countries: Array<FilterOptionResource>;
+    /**
+     * Every product type in display order, including those with no products.
+     */
+    types: Array<FeaturedFilterOptionResource>;
+    /**
+     * Every genre in display order, including those with no products.
+     */
+    genres: Array<FeaturedFilterOptionResource>;
+    /**
+     * Every operating system in display order, including those with no products.
+     */
+    operating_systems: Array<FilterOptionResource>;
     /**
      * Price range of active products. Both bounds are null when there are no active products.
      */
@@ -180,24 +226,15 @@ export type ProductResource = {
     /**
      * Platform the key activates on.
      */
-    platform: {
-        value: 'steam' | 'epic_games' | 'gog' | 'ea_app' | 'ubisoft_connect' | 'battle_net' | 'xbox' | 'playstation' | 'nintendo';
-        label: 'Steam' | 'Epic Games' | 'GOG' | 'EA App' | 'Ubisoft Connect' | 'Battle.net' | 'Xbox' | 'PlayStation' | 'Nintendo';
-    };
+    platform: LookupResource;
     /**
      * Region the key can be activated in.
      */
-    region: {
-        value: 'global' | 'europe' | 'north_america' | 'united_kingdom' | 'latin_america' | 'asia';
-        label: 'Global' | 'Europe' | 'North America' | 'United Kingdom' | 'Latin America' | 'Asia';
-    };
+    region: LookupResource;
     /**
      * Kind of product.
      */
-    type: {
-        value: 'game' | 'dlc' | 'gift_card' | 'subscription' | 'in_game_currency';
-        label: 'Game' | 'DLC' | 'Gift Card' | 'Subscription' | 'In-Game Currency';
-    };
+    type: LookupResource;
     /**
      * Current selling price.
      */
@@ -258,16 +295,6 @@ export type ProductResource = {
  */
 export type ProductSort = 'title' | '-title' | 'price' | '-price' | 'created_at' | '-created_at';
 
-/**
- * ProductType
- */
-export type ProductType = 'game' | 'dlc' | 'gift_card' | 'subscription' | 'in_game_currency';
-
-/**
- * Region
- */
-export type Region = 'global' | 'europe' | 'north_america' | 'united_kingdom' | 'latin_america' | 'asia';
-
 export type V1ProductsIndexData = {
     body?: never;
     path?: never;
@@ -281,17 +308,29 @@ export type V1ProductsIndexData = {
          */
         'ids[]'?: Array<number> | null;
         /**
-         * Only return products for any of these platforms. A single value is also accepted. Repeat the parameter to match several (`platform[]=a&platform[]=b`).
+         * Only return products for any of these platform slugs (see `/v1/products/filters`). A single value is also accepted.
          */
-        'platform[]'?: Array<Platform> | null;
+        'platform[]'?: Array<string> | null;
         /**
-         * Only return products for any of these regions. A single value is also accepted. Repeat the parameter to match several (`region[]=a&region[]=b`).
+         * Only return products for any of these region slugs. A single value is also accepted.
          */
-        'region[]'?: Array<Region> | null;
+        'region[]'?: Array<string> | null;
         /**
-         * Only return products of any of these types. A single value is also accepted. Repeat the parameter to match several (`type[]=a&type[]=b`).
+         * Only return products that can be activated in this country (the product's region includes it). ISO 3166-1 alpha-2 code, any case.
          */
-        'type[]'?: Array<ProductType> | null;
+        country?: string | null;
+        /**
+         * Only return products of any of these product type slugs. A single value is also accepted.
+         */
+        'type[]'?: Array<string> | null;
+        /**
+         * Only return products in any of these genre slugs. A single value is also accepted.
+         */
+        'genre[]'?: Array<string> | null;
+        /**
+         * Only return products that run on any of these operating system slugs. A single value is also accepted.
+         */
+        'os[]'?: Array<string> | null;
         /**
          * Minimum price in cents (inclusive).
          */

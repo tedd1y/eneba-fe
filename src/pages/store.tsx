@@ -134,7 +134,7 @@ function WiredStore() {
         <ActiveFilters
           groups={groups}
           onValueChange={(id, value) => setFacet(id as FacetKey)(value)}
-          onClearAll={() => void setParams({ drms: null, regions: null, types: null, priceMin: null, priceMax: null, search: null, page: null })}
+          onClearAll={() => void setParams({ drms: null, regions: null, types: null, genres: null, os: null, country: null, priceMin: null, priceMax: null, search: null, page: null })}
           extra={params.search && (
             <Button variant="chip" size="sm" aria-label={`Remove search "${params.search}"`} onClick={() => void setParams({ search: null, page: null })}>
               Search: “

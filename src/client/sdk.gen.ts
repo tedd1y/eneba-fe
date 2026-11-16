@@ -24,14 +24,14 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 export const v1ProductsIndex = <ThrowOnError extends boolean = false>(options?: Options<V1ProductsIndexData, ThrowOnError>): RequestResult<V1ProductsIndexResponses, V1ProductsIndexErrors, ThrowOnError> => (options?.client ?? client).get<V1ProductsIndexResponses, V1ProductsIndexErrors, ThrowOnError>({ url: '/v1/products', ...options });
 
 /**
- * Display the specified product, including its description
+ * Display the specified product, including its description, genres and operating systems
  */
 export const v1ProductsShow = <ThrowOnError extends boolean = false>(options: Options<V1ProductsShowData, ThrowOnError>): RequestResult<V1ProductsShowResponses, V1ProductsShowErrors, ThrowOnError> => (options.client ?? client).get<V1ProductsShowResponses, V1ProductsShowErrors, ThrowOnError>({ url: '/v1/products/{product}', ...options });
 
 /**
  * List product filter options with counts
  *
- * Returns every platform, region and product type with the number of active products
- * matching each, plus the min/max price of active products in cents.
+ * Returns every platform, region, country, product type, genre and operating system with the number
+ * of active products matching each, plus the min/max price of active products in cents.
  */
 export const v1ProductsFiltersIndex = <ThrowOnError extends boolean = false>(options?: Options<V1ProductsFiltersIndexData, ThrowOnError>): RequestResult<V1ProductsFiltersIndexResponses, unknown, ThrowOnError> => (options?.client ?? client).get<V1ProductsFiltersIndexResponses, unknown, ThrowOnError>({ url: '/v1/products/filters', ...options });

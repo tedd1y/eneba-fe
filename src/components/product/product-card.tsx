@@ -12,7 +12,8 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
-import {Link} from "react-router";
+import { useState } from "react"
+import { Link } from "react-router"
 
 export type Product = {
   title: string
@@ -23,7 +24,9 @@ export type Product = {
   oldPrice?: string
   discount?: string
   cashback?: string
-  /** Token-based classes for the cover placeholder (until real art is wired in). */
+  /** Box art URL (API `image_url`); the `cover` placeholder shows when it's missing or fails to load. */
+  image?: string
+  /** Token-based classes for the cover placeholder. */
   cover: string
 }
 
@@ -58,8 +61,21 @@ function Cover({
   showCashback?: boolean
   className?: string
 }) {
+  // Remember which URL failed, so a new image (same card reused for another product) gets its own try.
+  const [failedImage, setFailedImage] = useState<string>()
+  const showImage = product.image && failedImage !== product.image
+
   return (
     <div className={cn("relative overflow-hidden", product.cover, className)}>
+      {showImage && (
+        <img
+          src={product.image}
+          alt=""
+          loading="lazy"
+          onError={() => setFailedImage(product.image)}
+          className="absolute inset-0 size-full object-cover"
+        />
+      )}
       {showBadges && (
         <CoverBadges product={product} showCashback={showCashback} className="absolute inset-x-0 bottom-0" />
       )}

@@ -12,7 +12,8 @@ export function toCardProps(p: ProductResource): Product {
     oldPrice: p.original_price?.formatted,
     discount: p.discount_percent > 0 ? `-${p.discount_percent}%` : undefined,
     cashback: p.cashback?.formatted,
-    // ProductCard has no image slot yet; token gradient placeholder until it does.
+    image: p.image_url || undefined,
+    // Shown while the image loads, or when there's none.
     cover: 'bg-linear-to-br from-surface-tile to-primary',
   }
 }

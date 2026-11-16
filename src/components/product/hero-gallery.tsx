@@ -1,6 +1,9 @@
 import { cn } from "@/lib/utils"
 
-/** Hero banner mosaic: one large promo + three tall side promos (side promos hidden on phone). */
+/**
+ * Hero banner row, 380px tall. Desktop: the main promo takes 2/3 of the width and the three side
+ * promos share the rest. Tablet and phone: all four get the same width (1/4 each).
+ */
 function HeroGallery({
   main,
   side,
@@ -9,10 +12,10 @@ function HeroGallery({
   side: React.ReactNode[]
 }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[2fr_repeat(3,1fr)]">
-      <div className="aspect-[2/1] md:aspect-auto md:min-h-72">{main}</div>
+    <div className="grid h-hero grid-cols-4 nav:grid-cols-[6fr_repeat(3,1fr)]">
+      <div className="min-w-0">{main}</div>
       {side.map((node, i) => (
-        <div key={i} className="hidden aspect-[3/5] md:block">
+        <div key={i} className="min-w-0">
           {node}
         </div>
       ))}
@@ -36,12 +39,13 @@ function PromoBanner({
     <a
       href="#"
       className={cn(
-        "flex size-full flex-col items-center justify-center gap-4 p-6 focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-none",
+        "@container flex size-full flex-col items-center justify-center gap-4 overflow-hidden p-2 focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-none",
         tone,
         className,
       )}
     >
-      <p className="text-center type-display">{title}</p>
+      {/* Narrow tiles (side promos, tablet/phone quarters) get a smaller, wrapping title. */}
+      <p className="text-center type-display wrap-break-word @max-xs:type-h3 @max-xs:hyphens-auto">{title}</p>
       {children}
     </a>
   )

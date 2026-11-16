@@ -2,6 +2,7 @@ import { Section } from '@/showcase/section.tsx'
 import { FilterSection, FilterSidebar } from '@/components/store/filter-section.tsx'
 import { RangeFilter, type RangeValue } from '@/components/store/range-filter.tsx'
 import { CheckboxFilter } from '@/components/store/checkbox-filter.tsx'
+import { ComboboxFilter } from '@/components/store/combobox-filter.tsx'
 import { ResultsCount, SortSelect, type SortOption } from '@/components/store/sort-select.tsx'
 import { StorePagination } from '@/components/store/store-pagination.tsx'
 import { XIcon } from 'lucide-react'
@@ -28,9 +29,16 @@ const sortOptions: (SortOption & { value: ProductSort })[] = [
 ]
 
 /** Checkbox facets; the keys are the URL param names (see lib/store-params). */
-type FacetKey = 'types' | 'drms' | 'regions'
+type FacetKey = 'types' | 'os' | 'drms' | 'regions' | 'genres'
 
-const facetLabels: Record<FacetKey, string> = { types: 'Type', drms: 'Platforms', regions: 'Regions' }
+/** Sidebar and chip order follows the design: Type, Operating system, Platforms, then Regions and Genres. */
+const facetLabels: Record<FacetKey, string> = {
+  types: 'Type',
+  os: 'Operating system',
+  drms: 'Platforms',
+  regions: 'Regions',
+  genres: 'Genres',
+}
 
 /** Maps API filter options onto the `FilterOption` shape the store filters expect. */
 function toFilterOptions(options: FilterOptionResource[] = []): FilterOption[] {
@@ -81,9 +89,13 @@ function WiredStore() {
   const { data: filters } = useQuery(v1ProductsFiltersIndexOptions())
   const facetOptions: Record<FacetKey, FilterOption[]> = {
     types: toFilterOptions(filters?.data.types),
+    os: toFilterOptions(filters?.data.operating_systems),
     drms: toFilterOptions(filters?.data.platforms),
     regions: toFilterOptions(filters?.data.regions),
+    genres: toFilterOptions(filters?.data.genres),
   }
+  const countryOptions = toFilterOptions(filters?.data.countries)
+  const countryLabel = countryOptions.find(o => o.value === params.country)?.label ?? params.country
   const priceMin = Math.floor((filters?.data.price.min?.amount ?? 0) / 100)
   const priceMax = Math.ceil((filters?.data.price.max?.amount ?? 50000) / 100)
 
@@ -119,11 +131,26 @@ function WiredStore() {
         <FilterSection title="Price range (EUR)">
           <RangeFilter min={priceMin} max={priceMax} value={price} onValueChange={setPrice} labels={['Minimum price', 'Maximum price']} />
         </FilterSection>
+        <FilterSection title="Country">
+          <ComboboxFilter
+            label="Country"
+            placeholder="All countries"
+            options={countryOptions}
+            value={params.country}
+            onValueChange={country => void setParams({ country, page: null })}
+          />
+        </FilterSection>
         <FilterSection title="Type" count={params.types.length}>
           <CheckboxFilter options={facetOptions.types} value={params.types} onValueChange={setFacet('types')} />
         </FilterSection>
+        <FilterSection title="Operating system" count={params.os.length}>
+          <CheckboxFilter options={facetOptions.os} value={params.os} onValueChange={setFacet('os')} />
+        </FilterSection>
         <FilterSection title="Platforms" count={params.drms.length}>
           <CheckboxFilter searchable searchLabel="Search platforms" options={facetOptions.drms} value={params.drms} onValueChange={setFacet('drms')} />
+        </FilterSection>
+        <FilterSection title="Genres" count={params.genres.length}>
+          <CheckboxFilter searchable searchLabel="Search genres" options={facetOptions.genres} value={params.genres} onValueChange={setFacet('genres')} />
         </FilterSection>
         <FilterSection title="Regions" count={params.regions.length}>
           <CheckboxFilter searchable searchLabel="Search regions" options={facetOptions.regions} value={params.regions} onValueChange={setFacet('regions')} />
@@ -135,13 +162,25 @@ function WiredStore() {
           groups={groups}
           onValueChange={(id, value) => setFacet(id as FacetKey)(value)}
           onClearAll={() => void setParams({ drms: null, regions: null, types: null, genres: null, os: null, country: null, priceMin: null, priceMax: null, search: null, page: null })}
-          extra={params.search && (
-            <Button variant="chip" size="sm" aria-label={`Remove search "${params.search}"`} onClick={() => void setParams({ search: null, page: null })}>
-              Search: “
-              {params.search}
-              ”
-              <XIcon data-icon="inline-end" />
-            </Button>
+          extra={(params.search || params.country) && (
+            <>
+              {params.country && (
+                <Button variant="chip" size="sm" aria-label={`Remove country ${countryLabel}`} onClick={() => void setParams({ country: null, page: null })}>
+                  Country:
+                  {' '}
+                  {countryLabel}
+                  <XIcon data-icon="inline-end" />
+                </Button>
+              )}
+              {params.search && (
+                <Button variant="chip" size="sm" aria-label={`Remove search "${params.search}"`} onClick={() => void setParams({ search: null, page: null })}>
+                  Search: “
+                  {params.search}
+                  ”
+                  <XIcon data-icon="inline-end" />
+                </Button>
+              )}
+            </>
           )}
         />
         <div className="flex flex-wrap items-center justify-between gap-2">

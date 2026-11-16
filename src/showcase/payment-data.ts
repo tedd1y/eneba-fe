@@ -17,47 +17,6 @@ export const paymentMethods: PaymentMethod[] = [
   { id: 'crypto', name: 'Crypto currencies', description: 'Pay with your selected crypto currency', logo: 'crypto', logoLabel: 'Crypto' },
 ]
 
-/** Sample order from the reference. Prices in cents (per unit) so the page can total them. */
-export type PaymentSeed = {
-  id: string
-  title: string
-  seller: { name: string, initials: string }
-  cover: string
-  unitPrice: number
-  cashback: number
-  quantity: number
-}
-
-export const paymentSeed: PaymentSeed[] = [
-  {
-    id: 'probably-stolen',
-    title: 'Probably Stolen - Cyberpunk Shopkeeper Sim Steam Key (PC) GLOBAL',
-    seller: { name: 'Cdkeynogap', initials: 'CK' },
-    cover: 'bg-linear-to-br from-chart-5 to-discount',
-    unitPrice: 860,
-    cashback: 95,
-    quantity: 1,
-  },
-  {
-    id: 'aoe2-gearup',
-    title: 'Age of Empires II: Definitive Edition Steam Key GLOBAL',
-    seller: { name: 'GearUp', initials: 'GU' },
-    cover: 'bg-linear-to-br from-region-alt to-surface-tile',
-    unitPrice: 2999,
-    cashback: 330,
-    quantity: 1,
-  },
-  {
-    id: 'aoe2-city',
-    title: 'Age of Empires II: Definitive Edition Steam Key GLOBAL',
-    seller: { name: 'City of Games', initials: 'CG' },
-    cover: 'bg-linear-to-br from-highlight to-primary',
-    unitPrice: 3802,
-    cashback: 418,
-    quantity: 1,
-  },
-]
-
 export const paymentLegal = {
   terms: { label: 'Terms and Conditions', href: '#' },
   privacy: { label: 'Privacy Notice', href: '#' },

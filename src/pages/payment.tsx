@@ -1,49 +1,53 @@
 import { useState } from 'react'
+import { Navigate } from 'react-router'
 
+import { CartLimitNotice } from '@/components/cart/cart-limit-notice'
 import { CheckoutHeader } from '@/components/cart/checkout-header'
 import { PaymentMethodList } from '@/components/payment/payment-method-list'
 import { PaymentSummary } from '@/components/payment/payment-summary'
 import { formatMoney } from '@/lib/money'
 import { checkoutSteps } from '@/showcase/cart-data'
-import { paymentLegal, paymentMethods, paymentSeed } from '@/showcase/payment-data'
+import { paymentLegal, paymentMethods } from '@/showcase/payment-data'
+import { CART_LIMIT_MESSAGE, MAX_CART_ITEMS, maxQuantityFor, useCartStore } from '@/stores/cart'
+import { toCartLine, useCartProducts } from '@/stores/use-cart-products'
 
 /**
- * Payment step: pick a method, review the order, Continue. All dummy for now (no payments API):
- * quantities and removals only change local state, and Continue just needs a method chosen.
+ * Payment step. The order comes from the cart store, priced by the API (same as the cart page),
+ * and quantity changes / removals update the real cart. Payment methods, sellers and Continue are
+ * still dummy (no payments API). An empty cart sends you back to /cart.
  * Desktop: methods | summary. Tablet: summary under the methods. Phone: summary pinned to the bottom.
  */
 function PaymentPage() {
   const [method, setMethod] = useState<string | null>(null)
-  const [seed, setSeed] = useState(paymentSeed)
+  const { lines, count, subtotal, cashback, currency, isLoading } = useCartProducts()
+  const items = useCartStore(s => s.items)
+  const setQuantity = useCartStore(s => s.setQuantity)
+  const remove = useCartStore(s => s.remove)
 
-  const subtotal = seed.reduce((sum, s) => sum + s.unitPrice * s.quantity, 0)
-  const cashback = seed.reduce((sum, s) => sum + s.cashback * s.quantity, 0)
-  const sellers = [...new Set(seed.map(s => s.seller.name))]
+  if (count === 0) return <Navigate to="/cart" replace />
 
-  const lines = seed.map(s => ({
-    id: s.id,
-    title: s.title,
-    seller: s.seller,
-    cover: s.cover,
-    price: formatMoney(s.unitPrice * s.quantity),
-    cashback: formatMoney(s.cashback * s.quantity),
-    quantity: s.quantity,
-    note: 'Digital product',
-  }))
+  const cartLines = lines.map(toCartLine)
+  const sellers = [...new Set(cartLines.map(l => l.seller.name))]
 
   return (
     <div className="mx-auto grid w-full max-w-checkout items-start sm:gap-7.5 lg:grid-cols-[1fr_var(--spacing-payment-summary)]">
       <PaymentMethodList methods={paymentMethods} value={method} onValueChange={setMethod} />
       <PaymentSummary
-        lines={lines}
-        onQuantityChange={(line, quantity) => setSeed(list => list.map(s => (s.id === line.id ? { ...s, quantity } : s)))}
-        onRemove={line => setSeed(list => list.filter(s => s.id !== line.id))}
-        onWishlist={() => {}}
-        subtotal={formatMoney(subtotal)}
-        total={formatMoney(subtotal)}
-        cashback={cashback ? formatMoney(cashback) : undefined}
+        lines={cartLines}
+        status={(
+          <>
+            {count >= MAX_CART_ITEMS && <CartLimitNotice className="max-sm:px-5">{CART_LIMIT_MESSAGE}</CartLimitNotice>}
+            {isLoading && <p className="type-body text-muted-foreground max-sm:px-5" aria-live="polite">Loading your cart…</p>}
+          </>
+        )}
+        getMaxQuantity={line => maxQuantityFor(items, Number(line.id))}
+        onQuantityChange={(line, quantity) => setQuantity(Number(line.id), quantity)}
+        onRemove={line => remove(Number(line.id))}
+        subtotal={formatMoney(subtotal, currency)}
+        total={formatMoney(subtotal, currency)}
+        cashback={cashback ? formatMoney(cashback, currency) : undefined}
         sellers={sellers}
-        continueDisabled={!method || seed.length === 0}
+        continueDisabled={!method || isLoading}
         legal={{
           ...paymentLegal,
           sellerPolicies: sellers.map(name => ({ label: `${name}'s T/C & Refund Policy`, href: '#' })),

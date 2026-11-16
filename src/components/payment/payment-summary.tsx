@@ -53,6 +53,8 @@ function PaymentLegal({ terms, privacy, cookies, sellerPolicies }: {
  */
 function PaymentSummary({
   lines,
+  getMaxQuantity,
+  status,
   onQuantityChange,
   onRemove,
   onWishlist,
@@ -68,6 +70,10 @@ function PaymentSummary({
   className,
 }: {
   lines: CartLine[]
+  /** Highest quantity each line's stepper allows (line and cart limits). */
+  getMaxQuantity?: (line: CartLine) => number
+  /** Note above the lines, e.g. "Loading your cart…" or the cart-full notice. */
+  status?: React.ReactNode
   onQuantityChange?: (line: CartLine, quantity: number) => void
   onRemove?: (line: CartLine) => void
   onWishlist?: (line: CartLine) => void
@@ -107,11 +113,13 @@ function PaymentSummary({
       </button>
 
       <div className={cn('flex flex-col gap-2 overflow-y-auto sm:px-5 sm:pt-5', open ? 'max-sm:min-h-0 max-sm:flex-1' : 'max-sm:hidden')}>
+        {status}
         {lines.map((line, i) => (
           <Fragment key={line.id}>
             {i > 0 && <Separator className="sm:hidden" />}
             <CartItem
               line={line}
+              maxQuantity={getMaxQuantity?.(line)}
               onQuantityChange={onQuantityChange}
               onRemove={onRemove}
               onWishlist={onWishlist}

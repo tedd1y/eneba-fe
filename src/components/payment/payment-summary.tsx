@@ -64,6 +64,8 @@ function PaymentSummary({
   cashback,
   sellers,
   continueDisabled,
+  continueLabel = 'Continue',
+  error,
   onContinue,
   legal,
   reviews,
@@ -84,6 +86,10 @@ function PaymentSummary({
   /** Seller names for "Payment collected on behalf of …". */
   sellers: string[]
   continueDisabled?: boolean
+  /** e.g. "Processing…" while the order is placed. */
+  continueLabel?: string
+  /** Why the last Continue failed; shown under the button. */
+  error?: string
   onContinue?: () => void
   legal: React.ComponentProps<typeof PaymentLegal>
   reviews?: { rating: number, label: string, href: string }
@@ -171,7 +177,8 @@ function PaymentSummary({
               {sellers.join(', ')}
             </p>
           )}
-          <Button variant="buy" className="w-full" disabled={continueDisabled} onClick={onContinue}>Continue</Button>
+          <Button variant="buy" className="w-full" disabled={continueDisabled} onClick={onContinue}>{continueLabel}</Button>
+          {error && <p role="alert" className="type-caption text-destructive">{error}</p>}
         </div>
 
         <PaymentLegal {...legal} />

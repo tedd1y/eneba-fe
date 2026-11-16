@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { V1ProductsFiltersIndexData, V1ProductsFiltersIndexResponses, V1ProductsIndexData, V1ProductsIndexErrors, V1ProductsIndexResponses, V1ProductsShowData, V1ProductsShowErrors, V1ProductsShowResponses } from './types.gen';
+import type { V1OrdersPayData, V1OrdersPayErrors, V1OrdersPayResponses, V1OrdersShowData, V1OrdersShowErrors, V1OrdersShowResponses, V1OrdersStoreData, V1OrdersStoreErrors, V1OrdersStoreResponses, V1ProductsFiltersIndexData, V1ProductsFiltersIndexResponses, V1ProductsIndexData, V1ProductsIndexErrors, V1ProductsIndexResponses, V1ProductsShowData, V1ProductsShowErrors, V1ProductsShowResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -17,6 +17,34 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
      */
     meta?: keyof ClientMeta extends never ? Record<string, unknown> : ClientMeta;
 };
+
+/**
+ * Place a guest order
+ *
+ * Creates a pending order priced from the catalog. Pay it with `POST /v1/orders/{order}/pay`, using the returned `uuid`.
+ * Limited to 10 requests per minute per client.
+ */
+export const v1OrdersStore = <ThrowOnError extends boolean = false>(options: Options<V1OrdersStoreData, ThrowOnError>): RequestResult<V1OrdersStoreResponses, V1OrdersStoreErrors, ThrowOnError> => (options.client ?? client).post<V1OrdersStoreResponses, V1OrdersStoreErrors, ThrowOnError>({
+    url: '/v1/orders',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Display an order by its UUID
+ */
+export const v1OrdersShow = <ThrowOnError extends boolean = false>(options: Options<V1OrdersShowData, ThrowOnError>): RequestResult<V1OrdersShowResponses, V1OrdersShowErrors, ThrowOnError> => (options.client ?? client).get<V1OrdersShowResponses, V1OrdersShowErrors, ThrowOnError>({ url: '/v1/orders/{order}', ...options });
+
+/**
+ * Pay an order
+ *
+ * Takes a mock payment that always succeeds. Paying an already paid order returns it unchanged, so retries are safe.
+ * Returns 409 when the order cannot be paid, e.g. because it was cancelled. Limited to 10 requests per minute per client.
+ */
+export const v1OrdersPay = <ThrowOnError extends boolean = false>(options: Options<V1OrdersPayData, ThrowOnError>): RequestResult<V1OrdersPayResponses, V1OrdersPayErrors, ThrowOnError> => (options.client ?? client).post<V1OrdersPayResponses, V1OrdersPayErrors, ThrowOnError>({ url: '/v1/orders/{order}/pay', ...options });
 
 /**
  * Display a paginated listing of active products

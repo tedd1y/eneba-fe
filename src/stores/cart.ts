@@ -28,6 +28,11 @@ type CartState = {
   /** Removes lines the API no longer returns (inactive / deleted). */
   prune: (missingIds: number[]) => void
 
+  /** Delivery email from the cart page, sent with the order. Persisted only when `rememberEmail`. */
+  email: string
+  rememberEmail: boolean
+  setEmail: (email: string, remember: boolean) => void
+
   /** "Added to cart" modal. UI only, never persisted. */
   addedOpen: boolean
   /** True when the last add was refused because a limit was hit. */
@@ -75,6 +80,10 @@ export const useCartStore = create<CartState>()(
         set(state => ({ items: state.items.filter(i => !missing.has(i.productId)) }))
       },
 
+      email: '',
+      rememberEmail: false,
+      setEmail: (email, remember) => set({ email, rememberEmail: remember }),
+
       addedOpen: false,
       addFailed: false,
       setAddedOpen: open => set({ addedOpen: open }),
@@ -83,8 +92,11 @@ export const useCartStore = create<CartState>()(
       name: 'eneba-cart',
       version: 1,
       storage: createJSONStorage(() => localStorage),
-      // Persist the lines only; modal flags are per-visit UI state.
-      partialize: state => ({ items: state.items }),
+      // Persist the lines (and the email only if "Remember me" was ticked); modal flags are per-visit UI state.
+      partialize: state => ({
+        items: state.items,
+        ...(state.rememberEmail && { email: state.email, rememberEmail: true }),
+      }),
     },
   ),
 )

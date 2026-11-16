@@ -27,3 +27,24 @@ export type PaymentMethod = {
 
 /** A link inside the legal note ("Terms and Conditions"). */
 export type LegalLink = { label: string, href: string }
+
+/** One product on the "Get your product" page. Values are display-ready. */
+export type DeliveryItem = {
+  id: string
+  title: string
+  /** Box art URL; falls back to `cover` token classes. */
+  image?: string
+  cover: string
+  /** Seller's activation instructions shown in the warning box. */
+  activationNote?: string
+  region: string
+  platform: string
+  productType: string
+  /** Enebium (loyalty points) earned for this item. */
+  enebium: number
+  /** Number of keys bought. */
+  quantity: number
+  /** Activation keys (one per unit), revealed after the buyer confirms platform and region. */
+  keys: string[]
+  seller: { name: string, initials: string, positivePercent: string, ratings: string }
+}

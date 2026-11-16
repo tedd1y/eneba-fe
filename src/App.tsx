@@ -11,6 +11,7 @@ import { Store } from '@/pages/store.tsx'
 import { Product } from '@/pages/product.tsx'
 import { Cart } from '@/pages/cart.tsx'
 import { Payment } from '@/pages/payment.tsx'
+import { OrderAccepted } from '@/pages/order-accepted.tsx'
 
 /** Why an add was refused: the whole cart is full, or that one product is at its per-line limit. */
 const limitMessage = (count: number) =>
@@ -58,6 +59,7 @@ function App() {
           </Route>
           <Route path="/cart" element={<Cart />} />
           <Route path="/payment" element={<Payment />} />
+          <Route path="/payment/accept/:uuid" element={<OrderAccepted />} />
         </Routes>
       </NuqsAdapter>
     </BrowserRouter>

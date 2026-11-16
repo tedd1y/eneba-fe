@@ -32,9 +32,12 @@ function CartPage() {
   const setQuantity = useCartStore(s => s.setQuantity)
   const remove = useCartStore(s => s.remove)
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
+  const savedEmail = useCartStore(s => s.email)
+  const savedRemember = useCartStore(s => s.rememberEmail)
+  const saveEmail = useCartStore(s => s.setEmail)
+  const [email, setEmail] = useState(savedEmail)
   const [emailTouched, setEmailTouched] = useState(false)
-  const [remember, setRemember] = useState(false)
+  const [remember, setRemember] = useState(savedRemember)
   const [donation, setDonation] = useState<string | null>(null)
   const [code, setCode] = useState<string>()
   const [consentValue, setConsentValue] = useState<Record<string, boolean>>({ reviews: true, offers: true })
@@ -116,7 +119,10 @@ function CartPage() {
             checkoutDisabled={count === 0}
             onCheckout={() => {
               setEmailTouched(true)
-              if (EMAIL_RE.test(email)) navigate('/payment')
+              if (EMAIL_RE.test(email)) {
+                saveEmail(email, remember)
+                void navigate('/payment')
+              }
               else setStatus('Email is required to checkout')
             }}
             discount={(

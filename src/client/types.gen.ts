@@ -63,6 +63,135 @@ export type LookupResource = {
 };
 
 /**
+ * OrderItemResource
+ */
+export type OrderItemResource = {
+    /**
+     * ID of the product bought, or null if it has since been removed from the catalog.
+     */
+    product_id: number | null;
+    /**
+     * Product title at checkout.
+     */
+    title: string;
+    /**
+     * Platform name at checkout.
+     */
+    platform: string;
+    /**
+     * Region name at checkout.
+     */
+    region: string;
+    /**
+     * Price of one key at checkout.
+     */
+    unit_price: {
+        /**
+         * Amount in minor units (cents).
+         */
+        amount: number;
+        /**
+         * Amount formatted for display in the given currency.
+         */
+        formatted: string;
+    };
+    /**
+     * Cashback earned per key.
+     */
+    unit_cashback: {
+        /**
+         * Amount in minor units (cents).
+         */
+        amount: number;
+        /**
+         * Amount formatted for display in the given currency.
+         */
+        formatted: string;
+    };
+    /**
+     * Number of keys.
+     */
+    quantity: number;
+    /**
+     * `unit_price` × `quantity`.
+     */
+    line_total: {
+        /**
+         * Amount in minor units (cents).
+         */
+        amount: number;
+        /**
+         * Amount formatted for display in the given currency.
+         */
+        formatted: string;
+    };
+};
+
+/**
+ * OrderResource
+ */
+export type OrderResource = {
+    /**
+     * Identifier used in order URLs (`/v1/orders/{uuid}`, `/v1/orders/{uuid}/pay`).
+     */
+    uuid: string;
+    /**
+     * Human-readable order number to show to the customer. Not accepted in URLs.
+     */
+    number: string;
+    email: string;
+    /**
+     * Where the order is in its lifecycle.
+     */
+    status: {
+        value: OrderStatus;
+        label: 'Pending' | 'Paid' | 'Completed' | 'Failed' | 'Cancelled';
+    };
+    /**
+     * Sum of all line totals.
+     */
+    subtotal: {
+        /**
+         * Amount in minor units (cents).
+         */
+        amount: number;
+        /**
+         * Amount formatted for display in the given currency.
+         */
+        formatted: string;
+    };
+    /**
+     * Total cashback earned on the order.
+     */
+    cashback: {
+        /**
+         * Amount in minor units (cents).
+         */
+        amount: number;
+        /**
+         * Amount formatted for display in the given currency.
+         */
+        formatted: string;
+    };
+    /**
+     * ISO 4217 currency code for all amounts.
+     */
+    currency: string;
+    items: Array<OrderItemResource>;
+    /**
+     * When payment was taken, or null while unpaid.
+     */
+    paid_at: string | null;
+    created_at: string | null;
+    updated_at: string | null;
+};
+
+/**
+ * OrderStatus
+ */
+export type OrderStatus = 'pending' | 'paid' | 'completed' | 'failed' | 'cancelled';
+
+/**
  * ProductDetailResource
  */
 export type ProductDetailResource = {
@@ -294,6 +423,168 @@ export type ProductResource = {
  *
  */
 export type ProductSort = 'title' | '-title' | 'price' | '-price' | 'created_at' | '-created_at';
+
+/**
+ * StoreOrderRequest
+ */
+export type StoreOrderRequest = {
+    /**
+     * Where the keys and receipt are sent.
+     */
+    email: string;
+    /**
+     * Products to buy, 1–40 distinct products and at most 40 keys in total. Prices are always taken from the catalog.
+     */
+    items: Array<{
+        /**
+         * ID of an active product. Each product may appear only once; use `quantity` for more keys.
+         */
+        product_id: number;
+        /**
+         * Number of keys of this product, 1–10.
+         */
+        quantity: number;
+    }>;
+};
+
+export type V1OrdersStoreData = {
+    body: StoreOrderRequest;
+    path?: never;
+    query?: never;
+    url: '/v1/orders';
+};
+
+export type V1OrdersStoreErrors = {
+    /**
+     * Validation error
+     */
+    422: {
+        /**
+         * Errors overview.
+         */
+        message: string;
+        /**
+         * A detailed description of each field that failed validation.
+         */
+        errors: {
+            [key: string]: Array<string>;
+        };
+    };
+    /**
+     * Too many requests
+     */
+    429: {
+        /**
+         * Error overview.
+         */
+        message: string;
+    };
+};
+
+export type V1OrdersStoreError = V1OrdersStoreErrors[keyof V1OrdersStoreErrors];
+
+export type V1OrdersStoreResponses = {
+    /**
+     * `OrderResource`
+     */
+    201: {
+        data: OrderResource;
+    };
+};
+
+export type V1OrdersStoreResponse = V1OrdersStoreResponses[keyof V1OrdersStoreResponses];
+
+export type V1OrdersShowData = {
+    body?: never;
+    path: {
+        /**
+         * The order UUID
+         */
+        order: string;
+    };
+    query?: never;
+    url: '/v1/orders/{order}';
+};
+
+export type V1OrdersShowErrors = {
+    /**
+     * Not found
+     */
+    404: {
+        /**
+         * Error overview.
+         */
+        message: string;
+    };
+};
+
+export type V1OrdersShowError = V1OrdersShowErrors[keyof V1OrdersShowErrors];
+
+export type V1OrdersShowResponses = {
+    /**
+     * `OrderResource`
+     */
+    200: {
+        data: OrderResource;
+    };
+};
+
+export type V1OrdersShowResponse = V1OrdersShowResponses[keyof V1OrdersShowResponses];
+
+export type V1OrdersPayData = {
+    body?: never;
+    path: {
+        /**
+         * The order UUID
+         */
+        order: string;
+    };
+    query?: never;
+    url: '/v1/orders/{order}/pay';
+};
+
+export type V1OrdersPayErrors = {
+    /**
+     * Not found
+     */
+    404: {
+        /**
+         * Error overview.
+         */
+        message: string;
+    };
+    /**
+     * Conflict
+     */
+    409: {
+        /**
+         * Error overview.
+         */
+        message: string;
+    };
+    /**
+     * Too many requests
+     */
+    429: {
+        /**
+         * Error overview.
+         */
+        message: string;
+    };
+};
+
+export type V1OrdersPayError = V1OrdersPayErrors[keyof V1OrdersPayErrors];
+
+export type V1OrdersPayResponses = {
+    /**
+     * `OrderResource`
+     */
+    200: {
+        data: OrderResource;
+    };
+};
+
+export type V1OrdersPayResponse = V1OrdersPayResponses[keyof V1OrdersPayResponses];
 
 export type V1ProductsIndexData = {
     body?: never;

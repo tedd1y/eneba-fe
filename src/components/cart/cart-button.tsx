@@ -80,7 +80,12 @@ function CartButton({
             <Separator />
 
             {lines.length === 0
-              ? <p className="px-5 py-8 text-center type-body text-muted-foreground">Your cart is empty.</p>
+              ? (
+                  <p className="px-5 py-8 text-center type-body text-muted-foreground" aria-live="polite">
+                    {/* count > 0 with no lines yet means prices are still loading. */}
+                    {count > 0 ? 'Loading your cart…' : 'Your cart is empty.'}
+                  </p>
+                )
               : (
                   <>
                     <div className="flex min-h-0 flex-col overflow-y-auto">
@@ -120,6 +125,7 @@ function CartButton({
                       </dl>
                       <div className="flex flex-col gap-3">
                         <PopoverPrimitive.Close
+                          nativeButton={false}
                           render={<Button variant="buy" className="w-full" nativeButton={false} render={<Link to={cartHref} />} />}
                         >
                           View cart

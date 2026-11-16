@@ -12,6 +12,7 @@ import type { FilterOptionResource, Platform, ProductResource, ProductSort, Prod
 import type { FilterOption } from '@/components/store/types.ts'
 import { useDebouncedValue } from '@/lib/use-debounced-value.ts'
 import { ProductCard } from '@/components/product/product-card.tsx'
+import { useCartStore } from '@/stores/cart'
 
 /** Store sort menu → API `sort` param (leading `-` = descending). */
 const sortOptions: (SortOption & { value: ProductSort })[] = [
@@ -54,6 +55,7 @@ function toCardProps(p: ProductResource) {
 }
 
 function WiredStore() {
+  const addToCart = useCartStore(s => s.add)
   const [price, setPrice] = useState<RangeValue>([null, null])
   const [multi, setMulti] = useState<Record<MultiKey, string[]>>(emptyMulti)
   const [sort, setSort] = useState<ProductSort>(sortOptions[0].value)
@@ -146,7 +148,7 @@ function WiredStore() {
         </div>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {data?.data.map(p => (
-            <ProductCard key={p.id} product={toCardProps(p)} offersHref={`/${p.slug}`} />
+            <ProductCard key={p.id} product={toCardProps(p)} offersHref={`/${p.slug}`} onAddToCart={() => addToCart(p.id)} />
           ))}
         </div>
         <StorePagination pageCount={pageCount} page={data?.meta.current_page ?? page} onPageChange={goToPage} />

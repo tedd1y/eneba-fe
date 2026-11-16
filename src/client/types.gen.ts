@@ -277,6 +277,10 @@ export type V1ProductsIndexData = {
          */
         search?: string | null;
         /**
+         * Only return products with these IDs. Inactive and unknown IDs are left out rather than rejected. Up to 100 IDs; set `per_page` high enough to get them all on one page.
+         */
+        'ids[]'?: Array<number> | null;
+        /**
          * Only return products for any of these platforms. A single value is also accepted. Repeat the parameter to match several (`platform[]=a&platform[]=b`).
          */
         'platform[]'?: Array<Platform> | null;

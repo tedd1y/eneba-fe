@@ -1,12 +1,12 @@
 import { cn } from '@/lib/utils'
 import { HeartIcon, SearchIcon, UserIcon } from "lucide-react"
-import { useState } from "react"
 import { Link } from "react-router"
 
 import { CartButton } from "@/components/cart/cart-button"
 import { Logo } from "@/components/layout/logo"
 import { formatMoney } from "@/lib/money"
-import { cartSeed } from "@/showcase/cart-data"
+import { selectCartCount, useCartStore } from "@/stores/cart"
+import { toCartLine, useCartProducts } from "@/stores/use-cart-products"
 import { SideMenu } from "@/components/layout/side-menu"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -24,33 +24,21 @@ const defaultNavLinks: NavLink[] = [
   { label: "GTA VI", href: "/store" },
 ]
 
-/**
- * Cart icon + popup in the header. Dummy cart state for now (seeded from the styleguide data);
- * swap for the real cart store when it exists.
- */
+/** Cart icon + popup in the header, driven by the cart store and priced from the API. */
 function HeaderCart() {
-  const [items, setItems] = useState(() => cartSeed.slice(0, 1))
-
-  const total = items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0)
-  const cashback = items.reduce((sum, i) => sum + Math.round(i.unitPrice * i.quantity * i.cashbackPercent / 100), 0)
-  const lines = items.map(i => ({
-    id: i.id,
-    title: i.title,
-    seller: i.seller,
-    cover: i.cover,
-    price: formatMoney(i.unitPrice * i.quantity),
-    cashback: formatMoney(Math.round(i.unitPrice * i.quantity * i.cashbackPercent / 100)),
-    quantity: i.quantity,
-    note: "Digital product",
-  }))
+  const { lines, subtotal, cashback, currency } = useCartProducts()
+  const setQuantity = useCartStore(s => s.setQuantity)
+  const remove = useCartStore(s => s.remove)
+  const count = useCartStore(selectCartCount)
 
   return (
     <CartButton
-      lines={lines}
-      total={formatMoney(total)}
-      cashback={cashback ? formatMoney(cashback) : undefined}
-      onQuantityChange={(line, q) => setItems(list => list.map(i => (i.id === line.id ? { ...i, quantity: q } : i)))}
-      onRemove={line => setItems(list => list.filter(i => i.id !== line.id))}
+      lines={lines.map(toCartLine)}
+      count={count}
+      total={formatMoney(subtotal, currency)}
+      cashback={cashback ? formatMoney(cashback, currency) : undefined}
+      onQuantityChange={(line, q) => setQuantity(Number(line.id), q)}
+      onRemove={line => remove(Number(line.id))}
     />
   )
 }

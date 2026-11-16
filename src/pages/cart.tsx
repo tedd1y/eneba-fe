@@ -7,10 +7,7 @@ import { CheckoutHeader } from '@/components/cart/checkout-header'
 import { DeliveryForm } from '@/components/cart/delivery-form'
 import { DonationPanel } from '@/components/cart/donation-panel'
 import { InspiredPicks } from '@/components/cart/inspired-picks'
-import type { CartLine } from '@/components/cart/types'
 import {
-  type CartSeed,
-  cartSeed,
   checkoutSteps,
   consents,
   discountCodes,
@@ -18,26 +15,19 @@ import {
   donationTotals,
   picks,
 } from '@/showcase/cart-data'
+import { useCartStore } from '@/stores/cart'
+import { toCartLine, useCartProducts } from '@/stores/use-cart-products'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-const toLine = (item: CartSeed): CartLine => ({
-  id: item.id,
-  title: item.title,
-  seller: item.seller,
-  cover: item.cover,
-  price: formatMoney(item.unitPrice * item.quantity),
-  cashback: formatMoney(Math.round(item.unitPrice * item.quantity * item.cashbackPercent / 100)),
-  quantity: item.quantity,
-  note: 'Digital product',
-})
-
 /**
- * Whole cart wired to one state: quantities, removal, donation, discount code and consents
- * all feed the summary. Desktop: cart + donation | delivery + summary. Phone: one column.
+ * Cart page. Lines, quantities and prices come from the cart store + API; donation, discount codes,
+ * consents, seller and picks are still dummy (no API yet). Desktop: cart + donation | delivery + summary.
  */
 function CartPage() {
-  const [items, setItems] = useState(cartSeed)
+  const { lines, count, subtotal, cashback, currency, isLoading } = useCartProducts()
+  const setQuantity = useCartStore(s => s.setQuantity)
+  const remove = useCartStore(s => s.remove)
   const [email, setEmail] = useState('')
   const [emailTouched, setEmailTouched] = useState(false)
   const [remember, setRemember] = useState(false)
@@ -46,18 +36,15 @@ function CartPage() {
   const [consentValue, setConsentValue] = useState<Record<string, boolean>>({ reviews: true, offers: true })
   const [status, setStatus] = useState('')
 
-  const count = items.reduce((n, i) => n + i.quantity, 0)
-  const subtotal = items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0)
-  const cashback = items.reduce((sum, i) => sum + Math.round(i.unitPrice * i.quantity * i.cashbackPercent / 100), 0)
   const discount = code ? Math.round(subtotal * discountCodes[code] / 100) : 0
   const donationCents = donation ? Number(donation) : 0
   const total = subtotal - discount + donationCents
   const emailError = emailTouched && !EMAIL_RE.test(email) ? 'Enter a valid email address' : undefined
 
   const rows = [
-    { label: `${count} ${count === 1 ? 'product' : 'products'}`, value: formatMoney(subtotal) },
-    ...(discount ? [{ label: `Discount (${code})`, value: `-${formatMoney(discount)}` }] : []),
-    ...(donationCents ? [{ label: 'Donation', value: formatMoney(donationCents) }] : []),
+    { label: `${count} ${count === 1 ? 'product' : 'products'}`, value: formatMoney(subtotal, currency) },
+    ...(discount ? [{ label: `Discount (${code})`, value: `-${formatMoney(discount, currency)}` }] : []),
+    ...(donationCents ? [{ label: 'Donation', value: formatMoney(donationCents, currency) }] : []),
     { label: 'Service fee', value: '--', hint: 'Calculated at payment' },
   ]
 
@@ -73,16 +60,17 @@ function CartPage() {
       <div className="flex flex-col gap-5 lg:grid lg:grid-cols-[1fr_var(--spacing-buy-box)] lg:items-start">
         <div className="contents lg:flex lg:flex-col lg:gap-5">
           <CartList>
-            {items.map(item => (
+            {isLoading && <p className="type-body text-muted-foreground" aria-live="polite">Loading your cart…</p>}
+            {lines.map(line => (
               <CartItem
-                key={item.id}
-                line={toLine(item)}
-                onQuantityChange={(_, q) => setItems(list => list.map(i => (i.id === item.id ? { ...i, quantity: q } : i)))}
+                key={line.productId}
+                line={toCartLine(line)}
+                onQuantityChange={(_, q) => setQuantity(line.productId, q)}
                 onRemove={() => {
-                  setItems(list => list.filter(i => i.id !== item.id))
-                  setStatus(`Removed ${item.title}`)
+                  remove(line.productId)
+                  setStatus(`Removed ${line.product.title}`)
                 }}
-                onWishlist={() => setStatus(`Moved ${item.title} to wishlist`)}
+                onWishlist={() => setStatus(`Moved ${line.product.title} to wishlist`)}
               />
             ))}
           </CartList>
@@ -114,15 +102,15 @@ function CartPage() {
 
           <CartSummary
             rows={rows}
-            total={formatMoney(total)}
-            cashback={cashback ? formatMoney(cashback) : undefined}
+            total={formatMoney(total, currency)}
+            cashback={cashback ? formatMoney(cashback, currency) : undefined}
             consents={consents}
             consentValue={consentValue}
             onConsentChange={(id, checked) => setConsentValue(v => ({ ...v, [id]: checked }))}
             checkoutDisabled={count === 0}
             onCheckout={() => {
               setEmailTouched(true)
-              setStatus(EMAIL_RE.test(email) ? `Checkout: ${formatMoney(total)} to ${email}` : 'Email is required to checkout')
+              setStatus(EMAIL_RE.test(email) ? `Checkout: ${formatMoney(total, currency)} to ${email}` : 'Email is required to checkout')
             }}
             discount={(
               <DiscountCode

@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 import { formatMoney } from '@/lib/money'
 import { CartItem, CartList } from '@/components/cart/cart-item'
+import { CartLimitNotice } from '@/components/cart/cart-limit-notice'
 import { CartSummary, DiscountCode } from '@/components/cart/cart-summary'
 import { CheckoutHeader } from '@/components/cart/checkout-header'
 import { DeliveryForm } from '@/components/cart/delivery-form'
@@ -15,7 +16,7 @@ import {
   donationTotals,
   picks,
 } from '@/showcase/cart-data'
-import { useCartStore } from '@/stores/cart'
+import { CART_LIMIT_MESSAGE, MAX_CART_ITEMS, maxQuantityFor, useCartStore } from '@/stores/cart'
 import { toCartLine, useCartProducts } from '@/stores/use-cart-products'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -26,6 +27,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
  */
 function CartPage() {
   const { lines, count, subtotal, cashback, currency, isLoading } = useCartProducts()
+  const items = useCartStore(s => s.items)
   const setQuantity = useCartStore(s => s.setQuantity)
   const remove = useCartStore(s => s.remove)
   const [email, setEmail] = useState('')
@@ -60,11 +62,13 @@ function CartPage() {
       <div className="flex flex-col gap-5 lg:grid lg:grid-cols-[1fr_var(--spacing-buy-box)] lg:items-start">
         <div className="contents lg:flex lg:flex-col lg:gap-5">
           <CartList>
+            {count >= MAX_CART_ITEMS && <CartLimitNotice>{CART_LIMIT_MESSAGE}</CartLimitNotice>}
             {isLoading && <p className="type-body text-muted-foreground" aria-live="polite">Loading your cart…</p>}
             {lines.map(line => (
               <CartItem
                 key={line.productId}
                 line={toCartLine(line)}
+                maxQuantity={maxQuantityFor(items, line.productId)}
                 onQuantityChange={(_, q) => setQuantity(line.productId, q)}
                 onRemove={() => {
                   remove(line.productId)

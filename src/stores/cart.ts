@@ -7,69 +7,92 @@ export type CartItem = {
   quantity: number
 }
 
+/** Most items (units, across all lines) the cart can hold. Also keeps pricing to one API request. */
+export const MAX_CART_ITEMS = 40
 /** Highest quantity a single line can reach. */
 export const MAX_QUANTITY = 10
 
+export const CART_LIMIT_MESSAGE = `Your cart is full. You can have up to ${MAX_CART_ITEMS} items.`
+
 type CartState = {
   items: CartItem[]
-  /** Adds `quantity` of a product (stacking onto an existing line, capped at MAX_QUANTITY). */
-  add: (productId: number, quantity?: number) => void
+  /** Adds one product. Returns false (and adds nothing) if the line or the cart is already full. */
+  add: (productId: number) => boolean
   remove: (productId: number) => void
-  /** Sets a line's quantity; 0 or less removes it. */
+  /** Sets a line's quantity, capped by the line and cart limits; 0 or less removes it. */
   setQuantity: (productId: number, quantity: number) => void
   clear: () => void
-  /** Drops lines whose product the API no longer returns (inactive / deleted). */
-  prune: (validIds: number[]) => void
+  /** Removes lines the API no longer returns (inactive / deleted). */
+  prune: (missingIds: number[]) => void
 
   /** "Added to cart" modal. UI only, never persisted. */
   addedOpen: boolean
+  /** True when the last add was refused because a limit was hit. */
+  addFailed: boolean
   setAddedOpen: (open: boolean) => void
 }
 
-const clamp = (quantity: number) => Math.min(MAX_QUANTITY, Math.max(1, Math.floor(quantity)))
+const countOf = (items: CartItem[]) => items.reduce((n, i) => n + i.quantity, 0)
 
 export const useCartStore = create<CartState>()(
   persist(
-    set => ({
+    (set, get) => ({
       items: [],
 
-      add: (productId, quantity = 1) =>
-        set((state) => {
-          const existing = state.items.find(i => i.productId === productId)
-          const items = existing
-            ? state.items.map(i => (i.productId === productId ? { ...i, quantity: clamp(i.quantity + quantity) } : i))
-            : [...state.items, { productId, quantity: clamp(quantity) }]
-          return { items, addedOpen: true }
-        }),
+      add: (productId) => {
+        const { items } = get()
+        const existing = items.find(i => i.productId === productId)
+        if (countOf(items) >= MAX_CART_ITEMS || (existing && existing.quantity >= MAX_QUANTITY)) {
+          set({ addedOpen: true, addFailed: true })
+          return false
+        }
+        set({
+          items: existing
+            ? items.map(i => (i.productId === productId ? { ...i, quantity: i.quantity + 1 } : i))
+            : [...items, { productId, quantity: 1 }],
+          addedOpen: true,
+          addFailed: false,
+        })
+        return true
+      },
 
       remove: productId => set(state => ({ items: state.items.filter(i => i.productId !== productId) })),
 
       setQuantity: (productId, quantity) =>
-        set(state => ({
-          items: quantity <= 0
-            ? state.items.filter(i => i.productId !== productId)
-            : state.items.map(i => (i.productId === productId ? { ...i, quantity: clamp(quantity) } : i)),
-        })),
+        set((state) => {
+          if (quantity <= 0) return { items: state.items.filter(i => i.productId !== productId) }
+          const others = countOf(state.items.filter(i => i.productId !== productId))
+          const capped = Math.min(Math.floor(quantity), MAX_QUANTITY, MAX_CART_ITEMS - others)
+          return { items: state.items.map(i => (i.productId === productId ? { ...i, quantity: Math.max(1, capped) } : i)) }
+        }),
 
       clear: () => set({ items: [] }),
 
-      prune: (validIds) => {
-        const valid = new Set(validIds)
-        set(state => (state.items.every(i => valid.has(i.productId)) ? state : { items: state.items.filter(i => valid.has(i.productId)) }))
+      prune: (missingIds) => {
+        const missing = new Set(missingIds)
+        set(state => ({ items: state.items.filter(i => !missing.has(i.productId)) }))
       },
 
       addedOpen: false,
+      addFailed: false,
       setAddedOpen: open => set({ addedOpen: open }),
     }),
     {
       name: 'eneba-cart',
       version: 1,
       storage: createJSONStorage(() => localStorage),
-      // Persist the lines only; the modal flag is per-visit UI state.
+      // Persist the lines only; modal flags are per-visit UI state.
       partialize: state => ({ items: state.items }),
     },
   ),
 )
 
-/** Total number of units in the cart (what the header bubble shows). */
-export const selectCartCount = (state: CartState) => state.items.reduce((n, i) => n + i.quantity, 0)
+/** Total number of items in the cart (what the header bubble shows). */
+export const selectCartCount = (state: CartState) => countOf(state.items)
+
+/** Highest quantity a line can be set to right now (line limit, and what's left of the cart limit). */
+export function maxQuantityFor(items: CartItem[], productId: number) {
+  const line = items.find(i => i.productId === productId)
+  const others = countOf(items) - (line?.quantity ?? 0)
+  return Math.min(MAX_QUANTITY, MAX_CART_ITEMS - others)
+}

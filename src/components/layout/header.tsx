@@ -5,7 +5,7 @@ import { Link } from "react-router"
 import { CartButton } from "@/components/cart/cart-button"
 import { Logo } from "@/components/layout/logo"
 import { formatMoney } from "@/lib/money"
-import { selectCartCount, useCartStore } from "@/stores/cart"
+import { CART_LIMIT_MESSAGE, MAX_CART_ITEMS, maxQuantityFor, selectCartCount, useCartStore } from "@/stores/cart"
 import { toCartLine, useCartProducts } from "@/stores/use-cart-products"
 import { SideMenu } from "@/components/layout/side-menu"
 import { Button } from "@/components/ui/button"
@@ -30,6 +30,7 @@ function HeaderCart() {
   const setQuantity = useCartStore(s => s.setQuantity)
   const remove = useCartStore(s => s.remove)
   const count = useCartStore(selectCartCount)
+  const items = useCartStore(s => s.items)
 
   return (
     <CartButton
@@ -39,6 +40,8 @@ function HeaderCart() {
       cashback={cashback ? formatMoney(cashback, currency) : undefined}
       onQuantityChange={(line, q) => setQuantity(Number(line.id), q)}
       onRemove={line => remove(Number(line.id))}
+      getMaxQuantity={line => maxQuantityFor(items, Number(line.id))}
+      limitMessage={count >= MAX_CART_ITEMS ? CART_LIMIT_MESSAGE : undefined}
     />
   )
 }

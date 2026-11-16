@@ -5,10 +5,7 @@ import type { ProductResource } from '@/client'
 import { v1ProductsIndexOptions } from '@/client/@tanstack/react-query.gen.ts'
 import type { CartLine } from '@/components/cart/types'
 import { formatMoney } from '@/lib/money'
-import { type CartItem, useCartStore } from '@/stores/cart'
-
-/** The API filter accepts up to 100 ids per request. */
-const MAX_IDS = 100
+import { type CartItem, MAX_CART_ITEMS, useCartStore } from '@/stores/cart'
 
 export type PricedCartLine = CartItem & {
   product: ProductResource
@@ -19,8 +16,8 @@ export type PricedCartLine = CartItem & {
 }
 
 /**
- * Prices the cart from the API: one `/v1/products?ids[]=…` request for every product in the cart.
- * Returns priced lines (in cart order) and totals in cents. Products the API leaves out
+ * Prices the cart from the API in one `/v1/products?ids[]=…` request. The cart is capped at
+ * MAX_CART_ITEMS, so every product fits on one page. Products the API leaves out
  * (inactive / unknown) are removed from the cart once a fresh response confirms they're gone.
  */
 export function useCartProducts() {
@@ -28,10 +25,10 @@ export function useCartProducts() {
   const prune = useCartStore(s => s.prune)
 
   // Sorted so reordering the cart never changes the query key.
-  const ids = useMemo(() => items.map(i => i.productId).sort((a, b) => a - b).slice(0, MAX_IDS), [items])
+  const ids = useMemo(() => items.map(i => i.productId).sort((a, b) => a - b), [items])
 
   const query = useQuery({
-    ...v1ProductsIndexOptions({ query: { 'ids[]': ids, 'per_page': MAX_IDS } }),
+    ...v1ProductsIndexOptions({ query: { 'ids[]': ids, 'per_page': MAX_CART_ITEMS } }),
     enabled: ids.length > 0,
     // Keep showing the old prices while a newly added product is fetched.
     placeholderData: keepPreviousData,
@@ -41,8 +38,11 @@ export function useCartProducts() {
   const isFresh = query.isSuccess && !query.isPlaceholderData
 
   useEffect(() => {
-    if (isFresh && products) prune(products.map(p => p.id))
-  }, [isFresh, products, prune])
+    if (!isFresh || !products) return
+    const returned = new Set(products.map(p => p.id))
+    const missing = ids.filter(id => !returned.has(id))
+    if (missing.length > 0) prune(missing)
+  }, [isFresh, products, ids, prune])
 
   return useMemo(() => {
     const byId = new Map((products ?? []).map(p => [p.id, p]))

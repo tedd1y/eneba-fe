@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 
 import { CartItem } from './cart-item'
+import { CartLimitNotice } from './cart-limit-notice'
 import type { CartLine } from './types'
 
 /**
@@ -25,6 +26,8 @@ function CartButton({
   onQuantityChange,
   onRemove,
   onCheckout,
+  getMaxQuantity,
+  limitMessage,
   open,
   onOpenChange,
   className,
@@ -39,6 +42,10 @@ function CartButton({
   onQuantityChange?: (line: CartLine, quantity: number) => void
   onRemove?: (line: CartLine) => void
   onCheckout?: () => void
+  /** Highest quantity each line's stepper allows (line + cart limits). */
+  getMaxQuantity?: (line: CartLine) => number
+  /** Shown above the totals when set, e.g. when the cart is full. */
+  limitMessage?: string
   open?: boolean
   onOpenChange?: (open: boolean) => void
   className?: string
@@ -93,6 +100,7 @@ function CartButton({
                         <CartItem
                           key={line.id}
                           line={line}
+                          maxQuantity={getMaxQuantity?.(line)}
                           onQuantityChange={onQuantityChange}
                           onRemove={onRemove}
                           className="border-b border-border bg-transparent"
@@ -101,6 +109,7 @@ function CartButton({
                     </div>
 
                     <div className="flex flex-col gap-4 p-5">
+                      {limitMessage && <CartLimitNotice>{limitMessage}</CartLimitNotice>}
                       <dl className="flex flex-col gap-1">
                         <div className="flex items-center justify-between type-body">
                           <dt>Service fee:</dt>

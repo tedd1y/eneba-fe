@@ -11,6 +11,8 @@ const inputGroupVariants = cva("", {
     variant: {
       default: "border-input",
       field: "border-transparent bg-field",
+      /** Filled field on the purple login panel. */
+      panel: "border-transparent bg-accent",
     },
   },
   defaultVariants: { variant: "default" },

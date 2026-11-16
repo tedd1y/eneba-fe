@@ -14,6 +14,8 @@ const inputVariants = cva(
         field: "border-transparent bg-field",
         /** Dark recessed field inside panels (cart email, discount code). */
         inset: "border-transparent bg-card",
+        /** Filled field on the purple login panel. */
+        panel: "border-transparent bg-accent",
       },
     },
     defaultVariants: { variant: "default" },

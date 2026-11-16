@@ -131,17 +131,18 @@ function Header({ navLinks = defaultNavLinks, className }: { navLinks?: NavLink[
             <HeartIcon />
           </Button>
           <HeaderCart />
-          <Button variant="ghost" size="icon" aria-label="Account" className="nav:hidden">
+          <Button variant="ghost" size="icon" aria-label="Log in" className="nav:hidden" nativeButton={false} render={<Link to="/login" />}>
             <UserIcon />
           </Button>
           {/* Two separate actions; gold text on hover, no fill. */}
           <div className="hidden items-center nav:flex">
-            <Button variant="ghost" className="px-2 hover:bg-transparent">
+            <Button variant="ghost" className="px-2 hover:bg-transparent" nativeButton={false} render={<Link to="/login" />}>
               <UserIcon data-icon="inline-start" />
               Log in
             </Button>
             <Separator orientation="vertical" className="h-4 bg-foreground data-vertical:self-center" />
-            <Button variant="ghost" className="px-2 hover:bg-transparent">
+            {/* No sign-up page yet; registering starts from the login page too. */}
+            <Button variant="ghost" className="px-2 hover:bg-transparent" nativeButton={false} render={<Link to="/login" />}>
               Register
             </Button>
           </div>

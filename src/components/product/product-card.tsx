@@ -158,18 +158,20 @@ function ProductCard({
   )
 }
 
-/** Horizontal list card used on phones. The whole card links to `offersHref`. */
+/** Horizontal list card used on phones, fixed at 171px tall so every row matches. The whole card links to `offersHref`. */
 function ProductCardRow({
   product,
   className,
   offersHref = "#",
+  onAddToCart,
 }: {
   product: Product
   className?: string
   offersHref?: string
+  onAddToCart?: (product: Product) => void
 }) {
   return (
-    <Card className={cn("relative flex-row gap-0 p-4", className)}>
+    <Card className={cn("relative h-card-row flex-row gap-0 overflow-hidden p-4", className)}>
       <CardLink to={offersHref} label={product.title} />
       <Cover product={product} showCashback={false} className="pointer-events-none aspect-square w-24 shrink-0" />
       <div className="pointer-events-none relative flex min-w-0 flex-1 flex-col gap-3">
@@ -184,7 +186,7 @@ function ProductCardRow({
         </CardHeader>
         <CardContent className="mt-auto flex items-end justify-between gap-2 pr-0">
           <PriceBlock product={product} />
-          <Button variant="secondary" size="icon-lg" aria-label="Add to cart" className="pointer-events-auto">
+          <Button variant="secondary" size="icon-lg" aria-label="Add to cart" className="pointer-events-auto" onClick={() => onAddToCart?.(product)}>
             <ShoppingCartIcon />
           </Button>
         </CardContent>

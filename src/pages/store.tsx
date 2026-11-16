@@ -6,7 +6,7 @@ import { ComboboxFilter } from '@/components/store/combobox-filter.tsx'
 import { ResultsCount, SortSelect, type SortOption } from '@/components/store/sort-select.tsx'
 import { StorePagination } from '@/components/store/store-pagination.tsx'
 import { XIcon } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { type ActiveFilterGroup, ActiveFilters } from '@/components/store/active-filters.tsx'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { v1ProductsFiltersIndexOptions, v1ProductsIndexOptions } from '@/client/@tanstack/react-query.gen.ts'
@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button'
 import { toProductsQuery, useStoreParams } from '@/lib/store-params'
 import type { FilterOption } from '@/components/store/types.ts'
 import { useDebouncedValue } from '@/lib/use-debounced-value.ts'
-import { ProductCard } from '@/components/product/product-card.tsx'
+import { ProductCard, ProductCardRow } from '@/components/product/product-card.tsx'
 import { useCartStore } from '@/stores/cart'
 
 /** Store sort menu → API `sort` param (leading `-` = descending). */
@@ -191,10 +191,17 @@ function WiredStore() {
             onValueChange={value => void setParams({ sort: value as ProductSort, page: null })}
           />
         </div>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {data?.data.map(p => (
-            <ProductCard key={p.id} product={toCardProps(p)} offersHref={`/${p.slug}`} onAddToCart={() => addToCart(p.id)} />
-          ))}
+        {/* Phone: one column of horizontal row cards. Tablet and up: the vertical card grid. */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          {data?.data.map((p) => {
+            const card = toCardProps(p)
+            return (
+              <Fragment key={p.id}>
+                <ProductCardRow product={card} offersHref={`/${p.slug}`} onAddToCart={() => addToCart(p.id)} className="sm:hidden" />
+                <ProductCard product={card} offersHref={`/${p.slug}`} onAddToCart={() => addToCart(p.id)} className="max-sm:hidden" />
+              </Fragment>
+            )
+          })}
         </div>
         <StorePagination pageCount={pageCount} page={data?.meta.current_page ?? params.page} onPageChange={goToPage} />
       </div>

@@ -233,6 +233,12 @@
   --spacing-product-cover: 12.5rem; /* 200px — box art next to the title */
   --spacing-media-thumb: 11rem;     /* 176px — screenshot / trailer thumbnails */
 
+  /* Phone product row card → h-card-row */
+  --spacing-card-row: 10.6875rem; /* 171px — fixed so rows stay even */
+
+  /* Home hero → h-hero */
+  --spacing-hero: 23.75rem; /* 380px — promo banner row */
+
   /* Payment page → w-payment-summary */
   --spacing-payment-summary: 27.8125rem; /* 445px — order summary column */
 }

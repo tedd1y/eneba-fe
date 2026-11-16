@@ -49,6 +49,32 @@ export type FilterOptionResource = {
 };
 
 /**
+ * GenreResource
+ */
+export type GenreResource = {
+    /**
+     * Slug, the value the `genre[]` filter of `/v1/products` accepts.
+     */
+    value: string;
+    /**
+     * Human-readable name.
+     */
+    label: string;
+    /**
+     * Number of active products in this genre, as on `/v1/products/filters`.
+     */
+    count: number;
+    /**
+     * Icon key for the frontend's icon set, or null when there is none.
+     */
+    icon: string | null;
+    /**
+     * Whether to highlight this genre, e.g. as a quick filter.
+     */
+    is_featured: boolean;
+};
+
+/**
  * HomeGalleryResource
  */
 export type HomeGalleryResource = {
@@ -479,6 +505,24 @@ export type StoreOrderRequest = {
         quantity: number;
     }>;
 };
+
+export type V1GenresIndexData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/genres';
+};
+
+export type V1GenresIndexResponses = {
+    /**
+     * Array of `GenreResource`
+     */
+    200: {
+        data: Array<GenreResource>;
+    };
+};
+
+export type V1GenresIndexResponse = V1GenresIndexResponses[keyof V1GenresIndexResponses];
 
 export type V1HomeGalleriesIndexData = {
     body?: never;

@@ -24,8 +24,8 @@ import {
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
-import type { FilterOptionResource, HomeGalleryResource } from '@/client'
-import { v1HomeGalleriesIndexOptions, v1ProductsFiltersIndexOptions, v1ProductsIndexOptions } from '@/client/@tanstack/react-query.gen'
+import type { HomeGalleryResource } from '@/client'
+import { v1GenresIndexOptions, v1HomeGalleriesIndexOptions, v1ProductsIndexOptions } from '@/client/@tanstack/react-query.gen'
 
 import { Block, type BlockTone } from '@/components/layout/block'
 import { BrandTile } from '@/components/product/brand-tile'
@@ -51,12 +51,6 @@ const quickLinks: QuickLinkItem[] = [
 ]
 
 const brands = ['Razer Gold', 'iTunes', 'Amazon', 'Google Play', 'Netflix', 'Spotify']
-
-/**
- * Genre from /v1/products/filters. The API also sends `icon`,
- * which its OpenAPI spec doesn't document yet, so it's typed here.
- */
-type Genre = FilterOptionResource & { icon?: string | null }
 
 /** API icon name → Lucide icon. Unknown names and `null` fall back to the gamepad. */
 const genreIcons: Record<string, LucideIcon> = {
@@ -84,8 +78,9 @@ const COLLAPSED_GENRES = 7
  */
 function CategoriesBlock({ tone }: { tone: BlockTone }) {
   const [showAll, setShowAll] = useState(false)
-  const { data } = useQuery(v1ProductsFiltersIndexOptions())
-  const genres: Genre[] = (data?.data.genres ?? []).toSorted((a, b) => b.count - a.count)
+  const { data } = useQuery(v1GenresIndexOptions())
+  // Stable sort: genres with equal counts keep the API's order.
+  const genres = (data?.data ?? []).toSorted((a, b) => b.count - a.count)
   if (genres.length === 0) return null
 
   const shown = showAll ? genres : genres.slice(0, COLLAPSED_GENRES)

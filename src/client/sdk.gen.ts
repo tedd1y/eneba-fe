@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { V1HomeGalleriesIndexData, V1HomeGalleriesIndexResponses, V1MenusSidemenuIndexData, V1MenusSidemenuIndexResponses, V1OrdersPayData, V1OrdersPayErrors, V1OrdersPayResponses, V1OrdersShowData, V1OrdersShowErrors, V1OrdersShowResponses, V1OrdersStoreData, V1OrdersStoreErrors, V1OrdersStoreResponses, V1ProductsFiltersIndexData, V1ProductsFiltersIndexResponses, V1ProductsIndexData, V1ProductsIndexErrors, V1ProductsIndexResponses, V1ProductsShowData, V1ProductsShowErrors, V1ProductsShowResponses } from './types.gen';
+import type { V1GenresIndexData, V1GenresIndexResponses, V1HomeGalleriesIndexData, V1HomeGalleriesIndexResponses, V1MenusSidemenuIndexData, V1MenusSidemenuIndexResponses, V1OrdersPayData, V1OrdersPayErrors, V1OrdersPayResponses, V1OrdersShowData, V1OrdersShowErrors, V1OrdersShowResponses, V1OrdersStoreData, V1OrdersStoreErrors, V1OrdersStoreResponses, V1ProductsFiltersIndexData, V1ProductsFiltersIndexResponses, V1ProductsIndexData, V1ProductsIndexErrors, V1ProductsIndexResponses, V1ProductsShowData, V1ProductsShowErrors, V1ProductsShowResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -17,6 +17,14 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
      */
     meta?: keyof ClientMeta extends never ? Record<string, unknown> : ClientMeta;
 };
+
+/**
+ * List genres
+ *
+ * Returns every genre in display order with the number of active products in it, counted the same way as
+ * `GET /v1/products/filters`. `value` is the slug the `genre[]` filter of `GET /v1/products` accepts. Not paginated.
+ */
+export const v1GenresIndex = <ThrowOnError extends boolean = false>(options?: Options<V1GenresIndexData, ThrowOnError>): RequestResult<V1GenresIndexResponses, unknown, ThrowOnError> => (options?.client ?? client).get<V1GenresIndexResponses, unknown, ThrowOnError>({ url: '/v1/genres', ...options });
 
 /**
  * List the home page galleries

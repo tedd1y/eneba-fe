@@ -3,8 +3,8 @@
 import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { type Options, v1HomeGalleriesIndex, v1MenusSidemenuIndex, v1OrdersPay, v1OrdersShow, v1OrdersStore, v1ProductsFiltersIndex, v1ProductsIndex, v1ProductsShow } from '../sdk.gen';
-import type { V1HomeGalleriesIndexData, V1HomeGalleriesIndexResponse, V1MenusSidemenuIndexData, V1MenusSidemenuIndexResponse, V1OrdersPayData, V1OrdersPayError, V1OrdersPayResponse, V1OrdersShowData, V1OrdersShowError, V1OrdersShowResponse, V1OrdersStoreData, V1OrdersStoreError, V1OrdersStoreResponse, V1ProductsFiltersIndexData, V1ProductsFiltersIndexResponse, V1ProductsIndexData, V1ProductsIndexError, V1ProductsIndexResponse, V1ProductsShowData, V1ProductsShowError, V1ProductsShowResponse } from '../types.gen';
+import { type Options, v1GenresIndex, v1HomeGalleriesIndex, v1MenusSidemenuIndex, v1OrdersPay, v1OrdersShow, v1OrdersStore, v1ProductsFiltersIndex, v1ProductsIndex, v1ProductsShow } from '../sdk.gen';
+import type { V1GenresIndexData, V1GenresIndexResponse, V1HomeGalleriesIndexData, V1HomeGalleriesIndexResponse, V1MenusSidemenuIndexData, V1MenusSidemenuIndexResponse, V1OrdersPayData, V1OrdersPayError, V1OrdersPayResponse, V1OrdersShowData, V1OrdersShowError, V1OrdersShowResponse, V1OrdersStoreData, V1OrdersStoreError, V1OrdersStoreResponse, V1ProductsFiltersIndexData, V1ProductsFiltersIndexResponse, V1ProductsIndexData, V1ProductsIndexError, V1ProductsIndexResponse, V1ProductsShowData, V1ProductsShowError, V1ProductsShowResponse } from '../types.gen';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -38,6 +38,27 @@ const createQueryKey = <TOptions extends Options>(id: string, options?: TOptions
     }
     return [params];
 };
+
+export const v1GenresIndexQueryKey = (options?: Options<V1GenresIndexData>) => createQueryKey('v1GenresIndex', options);
+
+/**
+ * List genres
+ *
+ * Returns every genre in display order with the number of active products in it, counted the same way as
+ * `GET /v1/products/filters`. `value` is the slug the `genre[]` filter of `GET /v1/products` accepts. Not paginated.
+ */
+export const v1GenresIndexOptions = (options?: Options<V1GenresIndexData>) => queryOptions<V1GenresIndexResponse, DefaultError, V1GenresIndexResponse, ReturnType<typeof v1GenresIndexQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await v1GenresIndex({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: v1GenresIndexQueryKey(options)
+});
 
 export const v1HomeGalleriesIndexQueryKey = (options?: Options<V1HomeGalleriesIndexData>) => createQueryKey('v1HomeGalleriesIndex', options);
 

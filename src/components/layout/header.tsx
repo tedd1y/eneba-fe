@@ -1,5 +1,7 @@
+import { v1MenusSidemenuIndexOptions } from '@/client/@tanstack/react-query.gen'
 import { cn } from '@/lib/utils'
 import { HeartIcon, SearchIcon, UserIcon } from "lucide-react"
+import { useQuery } from "@tanstack/react-query"
 import { useQueryState } from "nuqs"
 import { useState } from "react"
 import { Link, useLocation, useNavigate } from "react-router"
@@ -14,18 +16,6 @@ import { SideMenu } from "@/components/layout/side-menu"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-
-export type NavLink = { label: string; href: string }
-
-const defaultNavLinks: NavLink[] = [
-  { label: "Cheap Games", href: "/store" },
-  { label: "Software", href: "/store" },
-  { label: "eGift Cards", href: "/store" },
-  { label: "Eneba Gift Cards", href: "/store" },
-  { label: "Probably Stolen", href: "/store" },
-  { label: "FM27", href: "/store" },
-  { label: "GTA VI", href: "/store" },
-]
 
 /** Cart icon + popup in the header, driven by the cart store and priced from the API. */
 function HeaderCart() {
@@ -101,7 +91,12 @@ function SearchField() {
  * - Full (≥ 930px): 147px — 97px bar (logo, search, locale, actions) + 50px sub-header
  *   (Categories menu, then category links).
  */
-function Header({ navLinks = defaultNavLinks, className }: { navLinks?: NavLink[], className?: string }) {
+function Header({ className }: { className?: string }) {
+  // Category links from /v1/menus/sidemenu, each pointing at a store filter (e.g. /store/all?types[]=software).
+  // The menu rarely changes, so it's fetched once per session.
+  const { data: menu } = useQuery({ ...v1MenusSidemenuIndexOptions(), staleTime: Infinity })
+  const navLinks = menu?.data ?? []
+
   return (
     <header className={cn('bg-background', className)}>
       <div className="mx-auto flex h-header-mobile max-w-page items-center gap-2 px-2 nav:h-header-bar nav:gap-6 nav:px-8">
@@ -154,7 +149,7 @@ function Header({ navLinks = defaultNavLinks, className }: { navLinks?: NavLink[
           <SideMenu />
           {navLinks.map((link) => (
             <Button
-              key={link.label}
+              key={link.href}
               variant="ghost"
               nativeButton={false}
               render={<Link to={link.href} />}

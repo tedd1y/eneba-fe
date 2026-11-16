@@ -3,8 +3,8 @@
 import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { type Options, v1OrdersPay, v1OrdersShow, v1OrdersStore, v1ProductsFiltersIndex, v1ProductsIndex, v1ProductsShow } from '../sdk.gen';
-import type { V1OrdersPayData, V1OrdersPayError, V1OrdersPayResponse, V1OrdersShowData, V1OrdersShowError, V1OrdersShowResponse, V1OrdersStoreData, V1OrdersStoreError, V1OrdersStoreResponse, V1ProductsFiltersIndexData, V1ProductsFiltersIndexResponse, V1ProductsIndexData, V1ProductsIndexError, V1ProductsIndexResponse, V1ProductsShowData, V1ProductsShowError, V1ProductsShowResponse } from '../types.gen';
+import { type Options, v1MenusSidemenuIndex, v1OrdersPay, v1OrdersShow, v1OrdersStore, v1ProductsFiltersIndex, v1ProductsIndex, v1ProductsShow } from '../sdk.gen';
+import type { V1MenusSidemenuIndexData, V1MenusSidemenuIndexResponse, V1OrdersPayData, V1OrdersPayError, V1OrdersPayResponse, V1OrdersShowData, V1OrdersShowError, V1OrdersShowResponse, V1OrdersStoreData, V1OrdersStoreError, V1OrdersStoreResponse, V1ProductsFiltersIndexData, V1ProductsFiltersIndexResponse, V1ProductsIndexData, V1ProductsIndexError, V1ProductsIndexResponse, V1ProductsShowData, V1ProductsShowError, V1ProductsShowResponse } from '../types.gen';
 
 /**
  * Place a guest order
@@ -211,4 +211,24 @@ export const v1ProductsFiltersIndexOptions = (options?: Options<V1ProductsFilter
         return data;
     },
     queryKey: v1ProductsFiltersIndexQueryKey(options)
+});
+
+export const v1MenusSidemenuIndexQueryKey = (options?: Options<V1MenusSidemenuIndexData>) => createQueryKey('v1MenusSidemenuIndex', options);
+
+/**
+ * List the side menu
+ *
+ * Returns every active side menu item in display order. The menu is short, so the list is not paginated.
+ */
+export const v1MenusSidemenuIndexOptions = (options?: Options<V1MenusSidemenuIndexData>) => queryOptions<V1MenusSidemenuIndexResponse, DefaultError, V1MenusSidemenuIndexResponse, ReturnType<typeof v1MenusSidemenuIndexQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await v1MenusSidemenuIndex({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: v1MenusSidemenuIndexQueryKey(options)
 });

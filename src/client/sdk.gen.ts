@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { V1OrdersPayData, V1OrdersPayErrors, V1OrdersPayResponses, V1OrdersShowData, V1OrdersShowErrors, V1OrdersShowResponses, V1OrdersStoreData, V1OrdersStoreErrors, V1OrdersStoreResponses, V1ProductsFiltersIndexData, V1ProductsFiltersIndexResponses, V1ProductsIndexData, V1ProductsIndexErrors, V1ProductsIndexResponses, V1ProductsShowData, V1ProductsShowErrors, V1ProductsShowResponses } from './types.gen';
+import type { V1MenusSidemenuIndexData, V1MenusSidemenuIndexResponses, V1OrdersPayData, V1OrdersPayErrors, V1OrdersPayResponses, V1OrdersShowData, V1OrdersShowErrors, V1OrdersShowResponses, V1OrdersStoreData, V1OrdersStoreErrors, V1OrdersStoreResponses, V1ProductsFiltersIndexData, V1ProductsFiltersIndexResponses, V1ProductsIndexData, V1ProductsIndexErrors, V1ProductsIndexResponses, V1ProductsShowData, V1ProductsShowErrors, V1ProductsShowResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -63,3 +63,10 @@ export const v1ProductsShow = <ThrowOnError extends boolean = false>(options: Op
  * of active products matching each, plus the min/max price of active products in cents.
  */
 export const v1ProductsFiltersIndex = <ThrowOnError extends boolean = false>(options?: Options<V1ProductsFiltersIndexData, ThrowOnError>): RequestResult<V1ProductsFiltersIndexResponses, unknown, ThrowOnError> => (options?.client ?? client).get<V1ProductsFiltersIndexResponses, unknown, ThrowOnError>({ url: '/v1/products/filters', ...options });
+
+/**
+ * List the side menu
+ *
+ * Returns every active side menu item in display order. The menu is short, so the list is not paginated.
+ */
+export const v1MenusSidemenuIndex = <ThrowOnError extends boolean = false>(options?: Options<V1MenusSidemenuIndexData, ThrowOnError>): RequestResult<V1MenusSidemenuIndexResponses, unknown, ThrowOnError> => (options?.client ?? client).get<V1MenusSidemenuIndexResponses, unknown, ThrowOnError>({ url: '/v1/menus/sidemenu', ...options });

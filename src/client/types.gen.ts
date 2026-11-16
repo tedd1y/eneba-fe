@@ -425,6 +425,20 @@ export type ProductResource = {
 export type ProductSort = 'title' | '-title' | 'price' | '-price' | 'created_at' | '-created_at';
 
 /**
+ * SideMenuItemResource
+ */
+export type SideMenuItemResource = {
+    /**
+     * Text shown in the menu.
+     */
+    label: string;
+    /**
+     * Storefront link the item points to, relative to the site root.
+     */
+    href: string;
+};
+
+/**
  * StoreOrderRequest
  */
 export type StoreOrderRequest = {
@@ -766,3 +780,21 @@ export type V1ProductsFiltersIndexResponses = {
 };
 
 export type V1ProductsFiltersIndexResponse = V1ProductsFiltersIndexResponses[keyof V1ProductsFiltersIndexResponses];
+
+export type V1MenusSidemenuIndexData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/menus/sidemenu';
+};
+
+export type V1MenusSidemenuIndexResponses = {
+    /**
+     * Array of `SideMenuItemResource`
+     */
+    200: {
+        data: Array<SideMenuItemResource>;
+    };
+};
+
+export type V1MenusSidemenuIndexResponse = V1MenusSidemenuIndexResponses[keyof V1MenusSidemenuIndexResponses];

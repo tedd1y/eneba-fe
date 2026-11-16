@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { V1MenusSidemenuIndexData, V1MenusSidemenuIndexResponses, V1OrdersPayData, V1OrdersPayErrors, V1OrdersPayResponses, V1OrdersShowData, V1OrdersShowErrors, V1OrdersShowResponses, V1OrdersStoreData, V1OrdersStoreErrors, V1OrdersStoreResponses, V1ProductsFiltersIndexData, V1ProductsFiltersIndexResponses, V1ProductsIndexData, V1ProductsIndexErrors, V1ProductsIndexResponses, V1ProductsShowData, V1ProductsShowErrors, V1ProductsShowResponses } from './types.gen';
+import type { V1HomeGalleriesIndexData, V1HomeGalleriesIndexResponses, V1MenusSidemenuIndexData, V1MenusSidemenuIndexResponses, V1OrdersPayData, V1OrdersPayErrors, V1OrdersPayResponses, V1OrdersShowData, V1OrdersShowErrors, V1OrdersShowResponses, V1OrdersStoreData, V1OrdersStoreErrors, V1OrdersStoreResponses, V1ProductsFiltersIndexData, V1ProductsFiltersIndexResponses, V1ProductsIndexData, V1ProductsIndexErrors, V1ProductsIndexResponses, V1ProductsShowData, V1ProductsShowErrors, V1ProductsShowResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -17,6 +17,14 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
      */
     meta?: keyof ClientMeta extends never ? Record<string, unknown> : ClientMeta;
 };
+
+/**
+ * List the home page galleries
+ *
+ * Returns every active gallery in display order, without products. Load a gallery's products from
+ * `GET /v1/products` using the filters in its `href` and `per_page` set to its `limit`. Not paginated.
+ */
+export const v1HomeGalleriesIndex = <ThrowOnError extends boolean = false>(options?: Options<V1HomeGalleriesIndexData, ThrowOnError>): RequestResult<V1HomeGalleriesIndexResponses, unknown, ThrowOnError> => (options?.client ?? client).get<V1HomeGalleriesIndexResponses, unknown, ThrowOnError>({ url: '/v1/home/galleries', ...options });
 
 /**
  * Place a guest order

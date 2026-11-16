@@ -11,9 +11,10 @@ import { Fragment, useEffect, useState } from 'react'
 import { type ActiveFilterGroup, ActiveFilters } from '@/components/store/active-filters.tsx'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { v1ProductsFiltersIndexOptions, v1ProductsIndexOptions } from '@/client/@tanstack/react-query.gen.ts'
-import type { FilterOptionResource, ProductResource, ProductSort } from '@/client'
+import type { FilterOptionResource, ProductSort } from '@/client'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import { toCardProps } from '@/lib/product-card'
 import { toProductsQuery, useStoreParams } from '@/lib/store-params'
 import type { FilterOption } from '@/components/store/types.ts'
 import { useDebouncedValue } from '@/lib/use-debounced-value.ts'
@@ -45,22 +46,6 @@ const facetLabels: Record<FacetKey, string> = {
 /** Maps API filter options onto the `FilterOption` shape the store filters expect. */
 function toFilterOptions(options: FilterOptionResource[] = []): FilterOption[] {
   return options.map(o => ({ value: o.value, label: o.label, count: o.count }))
-}
-
-/** Maps an API product onto the `Product` shape <ProductCard> renders. */
-function toCardProps(p: ProductResource) {
-  return {
-    title: p.title,
-    platform: p.platform.label,
-    region: p.region.label,
-    regionTone: p.region.value === 'europe' ? 'eu' as const : 'alt' as const,
-    price: p.price.formatted,
-    oldPrice: p.original_price?.formatted,
-    discount: p.discount_percent > 0 ? `-${p.discount_percent}%` : undefined,
-    cashback: p.cashback?.formatted,
-    // ProductCard has no image slot yet; token gradient placeholder until it does.
-    cover: 'bg-linear-to-br from-surface-tile to-primary',
-  }
 }
 
 /**

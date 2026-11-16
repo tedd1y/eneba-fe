@@ -14,8 +14,12 @@ import {
   WandSparklesIcon,
   ZapIcon,
 } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 
-import { Block } from '@/components/layout/block'
+import type { HomeGalleryResource } from '@/client'
+import { v1HomeGalleriesIndexOptions, v1ProductsIndexOptions } from '@/client/@tanstack/react-query.gen'
+
+import { Block, type BlockTone } from '@/components/layout/block'
 import { BrandTile } from '@/components/product/brand-tile'
 import { CategoryTile } from '@/components/product/category-tile'
 import { HeroGallery, PromoBanner } from '@/components/product/hero-gallery'
@@ -23,7 +27,9 @@ import { ProductCard } from '@/components/product/product-card'
 import { ProductRail } from '@/components/product/product-rail'
 import { QuickLinkStrip, type QuickLinkItem } from '@/components/product/quick-link'
 import { Button } from '@/components/ui/button'
-import { products } from '@/showcase/data'
+import { toCardProps } from '@/lib/product-card'
+import { storeHrefToProductsQuery } from '@/lib/store-params'
+import { useCartStore } from '@/stores/cart'
 
 const quickLinks: QuickLinkItem[] = [
   { icon: Gamepad2Icon, label: 'Games' },
@@ -48,7 +54,34 @@ const categories = [
   { icon: CrosshairIcon, label: 'FPS / TPS', count: 2820 },
 ]
 
+/**
+ * One product rail from /v1/home/galleries: the first `limit` products of the gallery's store link,
+ * with "See all" opening that link. Hidden until its products load, and when it has none.
+ */
+function GalleryRail({ gallery, tone }: { gallery: HomeGalleryResource, tone: BlockTone }) {
+  const addToCart = useCartStore(s => s.add)
+  const { data } = useQuery(v1ProductsIndexOptions({ query: storeHrefToProductsQuery(gallery.href, gallery.limit) }))
+  const products = data?.data ?? []
+  if (products.length === 0) return null
+
+  return (
+    <Block tone={tone} title={gallery.label} info action="See all" actionHref={gallery.href}>
+      <ProductRail>
+        {products.map(p => (
+          <ProductCard key={p.id} product={toCardProps(p)} offersHref={`/${p.slug}`} onAddToCart={() => addToCart(p.id)} />
+        ))}
+      </ProductRail>
+    </Block>
+  )
+}
+
+/** Blocks alternate between the page background and the darker band. */
+const toneAt = (index: number): BlockTone => (index % 2 === 0 ? 'page' : 'band')
+
 export function Home() {
+  const { data: galleries } = useQuery(v1HomeGalleriesIndexOptions())
+  const rails = galleries?.data ?? []
+
   return (
     <div>
       <main>
@@ -70,23 +103,9 @@ export function Home() {
         {/* Full width, no Block; keeps the Block's top spacing below the hero. */}
         <QuickLinkStrip items={quickLinks} className="pt-block nav:pt-block-lg" />
 
-        <Block title="Recommended for you" info action="See all">
-          <ProductRail>
-            {products.map(product => (
-              <ProductCard key={product.title} product={product} />
-            ))}
-          </ProductRail>
-        </Block>
+        {rails.map((gallery, i) => <GalleryRail key={gallery.id} gallery={gallery} tone={toneAt(i)} />)}
 
-        <Block tone="band" title="Top games" info action="Show all">
-          <ProductRail>
-            {products.map(product => (
-              <ProductCard key={product.title} product={product} />
-            ))}
-          </ProductRail>
-        </Block>
-
-        <Block title="Best selling eGift Cards" info action="Show all">
+        <Block tone={toneAt(rails.length)} title="Best selling eGift Cards" info action="Show all">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6">
             {brands.map(name => (
               <BrandTile key={name} name={name} />
@@ -94,7 +113,7 @@ export function Home() {
           </div>
         </Block>
 
-        <Block tone="band" title="Categories" action="Load more">
+        <Block tone={toneAt(rails.length + 1)} title="Categories" action="Load more">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7">
             {categories.map(category => (
               <CategoryTile key={category.label} {...category} />

@@ -1,4 +1,5 @@
 import { NuqsAdapter } from 'nuqs/adapters/react-router/v8'
+import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router'
 
 import { AddedToCartModal } from '@/components/cart/added-to-cart-modal'
@@ -35,6 +36,12 @@ function StoreRedirect() {
 
 /** Shared shell for storefront pages: the header stays pinned to the top while the page scrolls. */
 function SiteLayout() {
+  // Start each new page at the top. Keyed on the path only, so store filter / sort changes keep their place.
+  const { pathname } = useLocation()
+  useEffect(() => {
+    window.scrollTo({ top: 0 })
+  }, [pathname])
+
   return (
     <>
       <Header className="sticky top-0 z-40" />

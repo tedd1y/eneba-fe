@@ -3,28 +3,8 @@
 import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { type Options, v1MenusSidemenuIndex, v1OrdersPay, v1OrdersShow, v1OrdersStore, v1ProductsFiltersIndex, v1ProductsIndex, v1ProductsShow } from '../sdk.gen';
-import type { V1MenusSidemenuIndexData, V1MenusSidemenuIndexResponse, V1OrdersPayData, V1OrdersPayError, V1OrdersPayResponse, V1OrdersShowData, V1OrdersShowError, V1OrdersShowResponse, V1OrdersStoreData, V1OrdersStoreError, V1OrdersStoreResponse, V1ProductsFiltersIndexData, V1ProductsFiltersIndexResponse, V1ProductsIndexData, V1ProductsIndexError, V1ProductsIndexResponse, V1ProductsShowData, V1ProductsShowError, V1ProductsShowResponse } from '../types.gen';
-
-/**
- * Place a guest order
- *
- * Creates a pending order priced from the catalog. Pay it with `POST /v1/orders/{order}/pay`, using the returned `uuid`.
- * Limited to 10 requests per minute per client.
- */
-export const v1OrdersStoreMutation = (options?: Partial<Options<V1OrdersStoreData>>): UseMutationOptions<V1OrdersStoreResponse, V1OrdersStoreError, Options<V1OrdersStoreData>> => {
-    const mutationOptions: UseMutationOptions<V1OrdersStoreResponse, V1OrdersStoreError, Options<V1OrdersStoreData>> = {
-        mutationFn: async (fnOptions) => {
-            const { data } = await v1OrdersStore({
-                ...options,
-                ...fnOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
+import { type Options, v1HomeGalleriesIndex, v1MenusSidemenuIndex, v1OrdersPay, v1OrdersShow, v1OrdersStore, v1ProductsFiltersIndex, v1ProductsIndex, v1ProductsShow } from '../sdk.gen';
+import type { V1HomeGalleriesIndexData, V1HomeGalleriesIndexResponse, V1MenusSidemenuIndexData, V1MenusSidemenuIndexResponse, V1OrdersPayData, V1OrdersPayError, V1OrdersPayResponse, V1OrdersShowData, V1OrdersShowError, V1OrdersShowResponse, V1OrdersStoreData, V1OrdersStoreError, V1OrdersStoreResponse, V1ProductsFiltersIndexData, V1ProductsFiltersIndexResponse, V1ProductsIndexData, V1ProductsIndexError, V1ProductsIndexResponse, V1ProductsShowData, V1ProductsShowError, V1ProductsShowResponse } from '../types.gen';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -57,6 +37,47 @@ const createQueryKey = <TOptions extends Options>(id: string, options?: TOptions
         params.query = options.query;
     }
     return [params];
+};
+
+export const v1HomeGalleriesIndexQueryKey = (options?: Options<V1HomeGalleriesIndexData>) => createQueryKey('v1HomeGalleriesIndex', options);
+
+/**
+ * List the home page galleries
+ *
+ * Returns every active gallery in display order, without products. Load a gallery's products from
+ * `GET /v1/products` using the filters in its `href` and `per_page` set to its `limit`. Not paginated.
+ */
+export const v1HomeGalleriesIndexOptions = (options?: Options<V1HomeGalleriesIndexData>) => queryOptions<V1HomeGalleriesIndexResponse, DefaultError, V1HomeGalleriesIndexResponse, ReturnType<typeof v1HomeGalleriesIndexQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await v1HomeGalleriesIndex({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: v1HomeGalleriesIndexQueryKey(options)
+});
+
+/**
+ * Place a guest order
+ *
+ * Creates a pending order priced from the catalog. Pay it with `POST /v1/orders/{order}/pay`, using the returned `uuid`.
+ * Limited to 10 requests per minute per client.
+ */
+export const v1OrdersStoreMutation = (options?: Partial<Options<V1OrdersStoreData>>): UseMutationOptions<V1OrdersStoreResponse, V1OrdersStoreError, Options<V1OrdersStoreData>> => {
+    const mutationOptions: UseMutationOptions<V1OrdersStoreResponse, V1OrdersStoreError, Options<V1OrdersStoreData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await v1OrdersStore({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
 };
 
 export const v1OrdersShowQueryKey = (options: Options<V1OrdersShowData>) => createQueryKey('v1OrdersShow', options);

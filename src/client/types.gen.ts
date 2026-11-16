@@ -49,6 +49,25 @@ export type FilterOptionResource = {
 };
 
 /**
+ * HomeGalleryResource
+ */
+export type HomeGalleryResource = {
+    id: number;
+    /**
+     * Gallery heading.
+     */
+    label: string;
+    /**
+     * Storefront "See all" link, relative to the site root. Its query string uses the `GET /v1/products` filters.
+     */
+    href: string;
+    /**
+     * Number of products to show in the gallery; pass it as `per_page` when loading them.
+     */
+    limit: number;
+};
+
+/**
  * LookupResource
  */
 export type LookupResource = {
@@ -460,6 +479,24 @@ export type StoreOrderRequest = {
         quantity: number;
     }>;
 };
+
+export type V1HomeGalleriesIndexData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/home/galleries';
+};
+
+export type V1HomeGalleriesIndexResponses = {
+    /**
+     * Array of `HomeGalleryResource`
+     */
+    200: {
+        data: Array<HomeGalleryResource>;
+    };
+};
+
+export type V1HomeGalleriesIndexResponse = V1HomeGalleriesIndexResponses[keyof V1HomeGalleriesIndexResponses];
 
 export type V1OrdersStoreData = {
     body: StoreOrderRequest;

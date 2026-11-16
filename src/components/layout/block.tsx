@@ -1,4 +1,5 @@
 import { InfoIcon } from 'lucide-react'
+import { Link } from 'react-router'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -50,7 +51,7 @@ function Block({
               variant="secondary"
               size="wide"
               nativeButton={false}
-              render={<a href={actionHref} />}
+              render={<Link to={actionHref} />}
             >
               {action}
             </Button>

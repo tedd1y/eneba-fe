@@ -1,4 +1,5 @@
 import {
+  createLoader,
   createSerializer,
   parseAsFloat,
   parseAsInteger,
@@ -65,11 +66,14 @@ export type StoreParams = ReturnType<typeof useStoreParams>[0]
 /** Builds `?…` for the store from partial params, e.g. for links and the header search. */
 export const serializeStoreParams = createSerializer(storeParsers, options)
 
+/** Reads store params from any store URL or query string (e.g. a "See all" href), outside the current page. */
+export const loadStoreParams = createLoader(storeParsers, { urlKeys: storeUrlKeys })
+
 const toCents = (eur: number | null) => (eur === null ? undefined : Math.round(eur * 100))
 const orUndefined = <T>(list: T[]) => (list.length > 0 ? list : undefined)
 
 /** URL params → `/v1/products` query. The only place URL names meet API names. */
-export function toProductsQuery(params: StoreParams): NonNullable<V1ProductsIndexData['query']> {
+export function toProductsQuery(params: StoreParams, perPage = PAGE_SIZE): NonNullable<V1ProductsIndexData['query']> {
   return {
     'platform[]': orUndefined(params.drms),
     'region[]': orUndefined(params.regions),
@@ -81,9 +85,18 @@ export function toProductsQuery(params: StoreParams): NonNullable<V1ProductsInde
     'max_price': toCents(params.priceMax),
     'sort': params.sort,
     'page': params.page,
-    'per_page': PAGE_SIZE,
+    'per_page': perPage,
     'search': params.search || undefined,
   }
+}
+
+/**
+ * `/v1/products` query for a store link such as `/store/all?types[]=game&sort=-price`:
+ * the first `limit` products that link shows.
+ */
+export function storeHrefToProductsQuery(href: string, limit: number) {
+  const { search } = new URL(href, 'http://localhost')
+  return toProductsQuery({ ...loadStoreParams(search), page: 1 }, limit)
 }
 
 /**

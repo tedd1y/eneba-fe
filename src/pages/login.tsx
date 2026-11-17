@@ -1,42 +1,40 @@
-import { useState } from 'react'
-import { Link } from 'react-router'
+import { useSearchParams } from 'react-router'
 
-import { Logo } from '@/components/layout/logo'
-import { LoginFooter } from '@/components/login/login-footer'
+import { AuthLayout } from '@/components/login/auth-layout'
 import { LoginForm } from '@/components/login/login-form'
+import { useRequestMagicLink } from '@/lib/auth'
+
+/** Only storefront paths (one leading `/`), as the API requires; anything else falls back to `/`. */
+const safeRedirect = (value: string | null) =>
+  value?.startsWith('/') && !value.startsWith('//') ? value : undefined
 
 /**
- * `/login`, from design/brand/login. Desktop: dark page, "Hi! It's nice to see you!" on the left,
- * the form on a purple panel to the right. Tablet / phone: purple page, form only, footer stacked.
- * There's no auth API yet, so submitting only validates and says so.
+ * `/login?redirect=/path`, from design/brand/login. Emails a magic sign-in link (`POST /auth/magic-link`);
+ * `redirect` is where /auth/magic sends the user after signing in (`/` without one).
  */
 export function Login() {
-  const [status, setStatus] = useState<string>()
+  const [params] = useSearchParams()
+  const redirect = safeRedirect(params.get('redirect'))
+  const requestLink = useRequestMagicLink()
 
   return (
-    <div className="flex min-h-svh flex-col bg-background lg:bg-card">
-      <header className="flex px-6 pt-6">
-        <Link to="/" aria-label="Eneba home" className="shrink-0">
-          <Logo className="h-12" />
-        </Link>
-      </header>
-
-      <main className="flex items-start justify-center px-4 pt-6 pb-12 lg:flex-1 lg:items-center lg:justify-between lg:gap-12 lg:px-32 lg:py-12">
-        <p className="hidden text-7xl leading-[0.95] font-bold tracking-tight lg:block xl:text-8xl" aria-hidden>
+    <AuthLayout
+      greeting={(
+        <>
           Hi!
           <br />
           It’s nice to
           <br />
           see you!
-        </p>
-        <LoginForm
-          onSubmit={({ email }) => setStatus(`Logging in isn't available yet (${email}).`)}
-          status={status}
-          className="w-full max-w-91 lg:max-w-95 lg:bg-background lg:p-10"
-        />
-      </main>
-
-      <LoginFooter className="px-4 pb-8 lg:pb-7" />
-    </div>
+        </>
+      )}
+    >
+      <LoginForm
+        onSubmit={email => requestLink.mutate({ email, redirect })}
+        pending={requestLink.isPending}
+        error={requestLink.error?.message}
+        status={requestLink.isSuccess ? `We’ve emailed a sign-in link to ${requestLink.variables.email}. Check your inbox.` : undefined}
+      />
+    </AuthLayout>
   )
 }

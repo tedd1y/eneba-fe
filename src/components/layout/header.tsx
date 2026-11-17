@@ -96,6 +96,9 @@ function Header({ className }: { className?: string }) {
   // The menu rarely changes, so it's fetched once per session.
   const { data: menu } = useQuery({ ...v1MenusSidemenuIndexOptions(), staleTime: Infinity })
   const navLinks = menu?.data ?? []
+  // Log in comes back here once the emailed link is used (the API returns it as `redirect`).
+  const { pathname, search } = useLocation()
+  const loginHref = pathname === '/' ? '/login' : `/login?redirect=${encodeURIComponent(pathname + search)}`
 
   return (
     <header className={cn('bg-background', className)}>
@@ -126,19 +129,14 @@ function Header({ className }: { className?: string }) {
             <HeartIcon />
           </Button>
           <HeaderCart />
-          <Button variant="ghost" size="icon" aria-label="Log in" className="nav:hidden" nativeButton={false} render={<Link to="/login" />}>
+          <Button variant="ghost" size="icon" aria-label="Log in" className="nav:hidden" nativeButton={false} render={<Link to={loginHref} />}>
             <UserIcon />
           </Button>
-          {/* Two separate actions; gold text on hover, no fill. */}
+          {/* Gold text on hover, no fill. */}
           <div className="hidden items-center nav:flex">
-            <Button variant="ghost" className="px-2 hover:bg-transparent" nativeButton={false} render={<Link to="/login" />}>
+            <Button variant="ghost" className="px-2 hover:bg-transparent" nativeButton={false} render={<Link to={loginHref} />}>
               <UserIcon data-icon="inline-start" />
               Log in
-            </Button>
-            <Separator orientation="vertical" className="h-4 bg-foreground data-vertical:self-center" />
-            {/* No sign-up page yet; registering starts from the login page too. */}
-            <Button variant="ghost" className="px-2 hover:bg-transparent" nativeButton={false} render={<Link to="/login" />}>
-              Register
             </Button>
           </div>
         </div>

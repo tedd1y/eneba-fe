@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { LoginStoreData, LoginStoreErrors, LoginStoreResponses, LogoutData, LogoutErrors, LogoutResponses, PasswordConfirmationData, PasswordConfirmationErrors, PasswordConfirmationResponses, PasswordConfirmStoreData, PasswordConfirmStoreErrors, PasswordConfirmStoreResponses, PasswordEmailData, PasswordEmailErrors, PasswordEmailResponses, PasswordUpdateData, PasswordUpdateErrors, PasswordUpdateResponses, RegisterStoreData, RegisterStoreErrors, RegisterStoreResponses, V1GenresIndexData, V1GenresIndexResponses, V1HomeGalleriesIndexData, V1HomeGalleriesIndexResponses, V1MenusSidemenuIndexData, V1MenusSidemenuIndexResponses, V1MeShowData, V1MeShowErrors, V1MeShowResponses, V1OrdersPayData, V1OrdersPayErrors, V1OrdersPayResponses, V1OrdersShowData, V1OrdersShowErrors, V1OrdersShowResponses, V1OrdersStoreData, V1OrdersStoreErrors, V1OrdersStoreResponses, V1ProductsFiltersIndexData, V1ProductsFiltersIndexResponses, V1ProductsIndexData, V1ProductsIndexErrors, V1ProductsIndexResponses, V1ProductsShowData, V1ProductsShowErrors, V1ProductsShowResponses, VerificationSendData, VerificationSendErrors, VerificationSendResponses, VerificationVerifyData, VerificationVerifyErrors, VerificationVerifyResponses } from './types.gen';
+import type { AuthLogoutData, AuthLogoutErrors, AuthLogoutResponses, AuthMagicLinkStoreData, AuthMagicLinkStoreErrors, AuthMagicLinkStoreResponses, AuthMagicLinkVerifyData, AuthMagicLinkVerifyErrors, AuthMagicLinkVerifyResponses, V1GenresIndexData, V1GenresIndexResponses, V1HomeGalleriesIndexData, V1HomeGalleriesIndexResponses, V1MenusSidemenuIndexData, V1MenusSidemenuIndexResponses, V1MeShowData, V1MeShowErrors, V1MeShowResponses, V1OrdersPayData, V1OrdersPayErrors, V1OrdersPayResponses, V1OrdersShowData, V1OrdersShowErrors, V1OrdersShowResponses, V1OrdersStoreData, V1OrdersStoreErrors, V1OrdersStoreResponses, V1ProductsFiltersIndexData, V1ProductsFiltersIndexResponses, V1ProductsIndexData, V1ProductsIndexErrors, V1ProductsIndexResponses, V1ProductsShowData, V1ProductsShowErrors, V1ProductsShowResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -19,12 +19,33 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 };
 
 /**
- * Log in
+ * Request a sign-in link
  *
- * Starts a session for the storefront. Limited to 5 attempts per minute per email and IP, and 10 per minute per email. Browser clients must first call `GET /sanctum/csrf-cookie` and send the `X-XSRF-TOKEN` header.
+ * Emails a single-use link to `{FRONTEND_URL}/auth/magic?token=…`, valid for 15 minutes. The response is
+ * the same for every address; the account is created when the link is first used. Pass `redirect` to have
+ * verify send the user back to a storefront path. Requesting a new link invalidates earlier ones.
+ * Limited to 5 per minute per IP and 3 per minute per email.
  */
-export const loginStore = <ThrowOnError extends boolean = false>(options: Options<LoginStoreData, ThrowOnError>): RequestResult<LoginStoreResponses, LoginStoreErrors, ThrowOnError> => (options.client ?? client).post<LoginStoreResponses, LoginStoreErrors, ThrowOnError>({
-    url: '/login',
+export const authMagicLinkStore = <ThrowOnError extends boolean = false>(options: Options<AuthMagicLinkStoreData, ThrowOnError>): RequestResult<AuthMagicLinkStoreResponses, AuthMagicLinkStoreErrors, ThrowOnError> => (options.client ?? client).post<AuthMagicLinkStoreResponses, AuthMagicLinkStoreErrors, ThrowOnError>({
+    url: '/auth/magic-link',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Sign in with a link
+ *
+ * Exchanges the token from the emailed link for a session (Sanctum cookie), creating the account on first
+ * sign-in, and returns the user plus the `redirect` path requested with the link. With `remember: true` a
+ * long-lived "remember me" cookie keeps the user signed in after the session expires. The token works once;
+ * following it also verifies the email address. Returns 422 for an unknown, used or expired token.
+ * Limited to 10 per minute per IP.
+ */
+export const authMagicLinkVerify = <ThrowOnError extends boolean = false>(options: Options<AuthMagicLinkVerifyData, ThrowOnError>): RequestResult<AuthMagicLinkVerifyResponses, AuthMagicLinkVerifyErrors, ThrowOnError> => (options.client ?? client).post<AuthMagicLinkVerifyResponses, AuthMagicLinkVerifyErrors, ThrowOnError>({
+    url: '/auth/magic-link/verify',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -35,135 +56,29 @@ export const loginStore = <ThrowOnError extends boolean = false>(options: Option
 /**
  * Log out
  *
- * Ends the session. Browser clients must first call `GET /sanctum/csrf-cookie` and send the `X-XSRF-TOKEN` header.
+ * Ends the session and rotates the CSRF token.
  */
-export const logout = <ThrowOnError extends boolean = false>(options?: Options<LogoutData, ThrowOnError>): RequestResult<LogoutResponses, LogoutErrors, ThrowOnError> => (options?.client ?? client).post<LogoutResponses, LogoutErrors, ThrowOnError>({
+export const authLogout = <ThrowOnError extends boolean = false>(options?: Options<AuthLogoutData, ThrowOnError>): RequestResult<AuthLogoutResponses, AuthLogoutErrors, ThrowOnError> => (options?.client ?? client).post<AuthLogoutResponses, AuthLogoutErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'laravel-session',
             type: 'apiKey'
         }],
-    url: '/logout',
+    url: '/auth/logout',
     ...options
-});
-
-/**
- * Request a password reset link
- *
- * Emails a link to `{FRONTEND_URL}/reset-password?token=…&email=…`. The response is the same whether or not the email is registered. Limited to 5 per minute per IP and 3 per minute per email. Browser clients must first call `GET /sanctum/csrf-cookie` and send the `X-XSRF-TOKEN` header.
- */
-export const passwordEmail = <ThrowOnError extends boolean = false>(options: Options<PasswordEmailData, ThrowOnError>): RequestResult<PasswordEmailResponses, PasswordEmailErrors, ThrowOnError> => (options.client ?? client).post<PasswordEmailResponses, PasswordEmailErrors, ThrowOnError>({
-    url: '/forgot-password',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * Reset password
- *
- * Sets a new password using the `token` and `email` from the reset link. Browser clients must first call `GET /sanctum/csrf-cookie` and send the `X-XSRF-TOKEN` header.
- */
-export const passwordUpdate = <ThrowOnError extends boolean = false>(options: Options<PasswordUpdateData, ThrowOnError>): RequestResult<PasswordUpdateResponses, PasswordUpdateErrors, ThrowOnError> => (options.client ?? client).post<PasswordUpdateResponses, PasswordUpdateErrors, ThrowOnError>({
-    url: '/reset-password',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * Register
- *
- * Creates an account, signs the user in and emails them a verification link. Limited to 5 per minute per IP. Browser clients must first call `GET /sanctum/csrf-cookie` and send the `X-XSRF-TOKEN` header.
- */
-export const registerStore = <ThrowOnError extends boolean = false>(options: Options<RegisterStoreData, ThrowOnError>): RequestResult<RegisterStoreResponses, RegisterStoreErrors, ThrowOnError> => (options.client ?? client).post<RegisterStoreResponses, RegisterStoreErrors, ThrowOnError>({
-    url: '/register',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * Verify email address
- *
- * The signed link from the verification email; open it in the browser where the user is logged in. It redirects to `{FRONTEND_URL}?verified=1`. Limited to 6 per minute.
- */
-export const verificationVerify = <ThrowOnError extends boolean = false>(options: Options<VerificationVerifyData, ThrowOnError>): RequestResult<VerificationVerifyResponses, VerificationVerifyErrors, ThrowOnError> => (options.client ?? client).get<VerificationVerifyResponses, VerificationVerifyErrors, ThrowOnError>({
-    security: [{
-            in: 'cookie',
-            name: 'laravel-session',
-            type: 'apiKey'
-        }],
-    url: '/email/verify/{id}/{hash}',
-    ...options
-});
-
-/**
- * Resend the verification email
- *
- * Emails a new verification link to the signed-in user. Limited to 6 per minute. Browser clients must first call `GET /sanctum/csrf-cookie` and send the `X-XSRF-TOKEN` header.
- */
-export const verificationSend = <ThrowOnError extends boolean = false>(options?: Options<VerificationSendData, ThrowOnError>): RequestResult<VerificationSendResponses, VerificationSendErrors, ThrowOnError> => (options?.client ?? client).post<VerificationSendResponses, VerificationSendErrors, ThrowOnError>({
-    security: [{
-            in: 'cookie',
-            name: 'laravel-session',
-            type: 'apiKey'
-        }],
-    url: '/email/verification-notification',
-    ...options
-});
-
-/**
- * Password confirmation status
- *
- * Whether the signed-in user has confirmed their password recently.
- */
-export const passwordConfirmation = <ThrowOnError extends boolean = false>(options?: Options<PasswordConfirmationData, ThrowOnError>): RequestResult<PasswordConfirmationResponses, PasswordConfirmationErrors, ThrowOnError> => (options?.client ?? client).get<PasswordConfirmationResponses, PasswordConfirmationErrors, ThrowOnError>({
-    security: [{
-            in: 'cookie',
-            name: 'laravel-session',
-            type: 'apiKey'
-        }],
-    url: '/user/confirmed-password-status',
-    ...options
-});
-
-/**
- * Confirm password
- *
- * Re-checks the signed-in user's password before a sensitive action. Browser clients must first call `GET /sanctum/csrf-cookie` and send the `X-XSRF-TOKEN` header.
- */
-export const passwordConfirmStore = <ThrowOnError extends boolean = false>(options: Options<PasswordConfirmStoreData, ThrowOnError>): RequestResult<PasswordConfirmStoreResponses, PasswordConfirmStoreErrors, ThrowOnError> => (options.client ?? client).post<PasswordConfirmStoreResponses, PasswordConfirmStoreErrors, ThrowOnError>({
-    security: [{
-            in: 'cookie',
-            name: 'laravel-session',
-            type: 'apiKey'
-        }],
-    url: '/user/confirm-password',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
 });
 
 /**
  * Display the signed-in user
  *
- * Works with Sanctum's session cookie (after `POST /api/login`) or a Sanctum bearer token. Returns 401 when not signed in.
+ * Uses the Sanctum session cookie from `POST /api/auth/magic-link/verify`. Returns 401 when not signed in.
  */
 export const v1MeShow = <ThrowOnError extends boolean = false>(options?: Options<V1MeShowData, ThrowOnError>): RequestResult<V1MeShowResponses, V1MeShowErrors, ThrowOnError> => (options?.client ?? client).get<V1MeShowResponses, V1MeShowErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'laravel-session',
             type: 'apiKey'
-        }, { scheme: 'bearer', type: 'http' }],
+        }],
     url: '/v1/me',
     ...options
 });

@@ -8,6 +8,7 @@ import { Link, useLocation, useNavigate } from "react-router"
 
 import { CartButton } from "@/components/cart/cart-button"
 import { Logo } from "@/components/layout/logo"
+import { useMe } from "@/lib/auth"
 import { formatMoney } from "@/lib/money"
 import { storeParsers, storeSearchUrl } from "@/lib/store-params"
 import { CART_LIMIT_MESSAGE, MAX_CART_ITEMS, maxQuantityFor, selectCartCount, useCartStore } from "@/stores/cart"
@@ -86,6 +87,50 @@ function SearchField() {
 }
 
 /**
+ * Account action: the signed-in user's email, or "Log in" for guests (just the icon below 930px).
+ * Nothing shows while `useMe` is still loading, so "Log in" doesn't flash for signed-in users.
+ */
+function HeaderAccount() {
+  const { data: user, isPending } = useMe()
+  // Log in comes back here once the emailed link is used (the API returns it as `redirect`).
+  const { pathname, search } = useLocation()
+  const loginHref = pathname === '/' ? '/login' : `/login?redirect=${encodeURIComponent(pathname + search)}`
+
+  if (isPending) return null
+
+  if (user) {
+    return (
+      <Button
+        variant="ghost"
+        nativeButton={false}
+        render={<span />}
+        title={user.email}
+        className="cursor-default px-2 hover:bg-transparent max-nav:size-9 max-nav:p-0"
+      >
+        <UserIcon data-icon="inline-start" aria-hidden />
+        <span className="hidden max-w-60 truncate nav:block">{user.email}</span>
+        <span className="sr-only nav:hidden">{user.email}</span>
+      </Button>
+    )
+  }
+
+  return (
+    <>
+      <Button variant="ghost" size="icon" aria-label="Log in" className="nav:hidden" nativeButton={false} render={<Link to={loginHref} />}>
+        <UserIcon />
+      </Button>
+      {/* Gold text on hover, no fill. */}
+      <div className="hidden items-center nav:flex">
+        <Button variant="ghost" className="px-2 hover:bg-transparent" nativeButton={false} render={<Link to={loginHref} />}>
+          <UserIcon data-icon="inline-start" />
+          Log in
+        </Button>
+      </div>
+    </>
+  )
+}
+
+/**
  * Site header — two states, switching at the `nav` breakpoint (930px):
  * - Compact (< 930px): one 55px row — menu on the left, logo, icon actions. No sub-header.
  * - Full (≥ 930px): 147px — 97px bar (logo, search, locale, actions) + 50px sub-header
@@ -96,9 +141,6 @@ function Header({ className }: { className?: string }) {
   // The menu rarely changes, so it's fetched once per session.
   const { data: menu } = useQuery({ ...v1MenusSidemenuIndexOptions(), staleTime: Infinity })
   const navLinks = menu?.data ?? []
-  // Log in comes back here once the emailed link is used (the API returns it as `redirect`).
-  const { pathname, search } = useLocation()
-  const loginHref = pathname === '/' ? '/login' : `/login?redirect=${encodeURIComponent(pathname + search)}`
 
   return (
     <header className={cn('bg-background', className)}>
@@ -129,16 +171,7 @@ function Header({ className }: { className?: string }) {
             <HeartIcon />
           </Button>
           <HeaderCart />
-          <Button variant="ghost" size="icon" aria-label="Log in" className="nav:hidden" nativeButton={false} render={<Link to={loginHref} />}>
-            <UserIcon />
-          </Button>
-          {/* Gold text on hover, no fill. */}
-          <div className="hidden items-center nav:flex">
-            <Button variant="ghost" className="px-2 hover:bg-transparent" nativeButton={false} render={<Link to={loginHref} />}>
-              <UserIcon data-icon="inline-start" />
-              Log in
-            </Button>
-          </div>
+          <HeaderAccount />
         </div>
       </div>
 

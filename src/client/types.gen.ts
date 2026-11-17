@@ -94,6 +94,15 @@ export type HomeGalleryResource = {
 };
 
 /**
+ * LoginRequest
+ */
+export type LoginRequest = {
+    email: string;
+    password: string;
+    remember?: string;
+};
+
+/**
  * LookupResource
  */
 export type LookupResource = {
@@ -470,6 +479,13 @@ export type ProductResource = {
 export type ProductSort = 'title' | '-title' | 'price' | '-price' | 'created_at' | '-created_at';
 
 /**
+ * SendPasswordResetLinkRequest
+ */
+export type SendPasswordResetLinkRequest = {
+    email: string;
+};
+
+/**
  * SideMenuItemResource
  */
 export type SideMenuItemResource = {
@@ -505,6 +521,547 @@ export type StoreOrderRequest = {
         quantity: number;
     }>;
 };
+
+/**
+ * UserResource
+ */
+export type UserResource = {
+    id: number;
+    name: string;
+    email: string;
+    /**
+     * When the email address was verified, or null while unverified.
+     */
+    email_verified_at: string | null;
+};
+
+export type LoginStoreData = {
+    body: {
+        /**
+         * Email address, case-insensitive.
+         */
+        email: string;
+        /**
+         * The account password.
+         */
+        password: string;
+        /**
+         * Keep the user signed in after the browser closes.
+         */
+        remember?: boolean;
+    };
+    path?: never;
+    query?: never;
+    url: '/login';
+};
+
+export type LoginStoreErrors = {
+    /**
+     * Missing or invalid CSRF token (`X-XSRF-TOKEN` header).
+     */
+    419: {
+        /**
+         * Error overview.
+         */
+        message: string;
+    };
+    /**
+     * Wrong email or password (`These credentials do not match our records.`).
+     */
+    422: {
+        /**
+         * Summary of the errors.
+         */
+        message: string;
+        /**
+         * Error messages, keyed by field.
+         */
+        errors: {
+            [key: string]: unknown;
+        };
+    };
+    /**
+     * Too many requests; try again later.
+     */
+    429: {
+        /**
+         * Error overview.
+         */
+        message: string;
+    };
+};
+
+export type LoginStoreError = LoginStoreErrors[keyof LoginStoreErrors];
+
+export type LoginStoreResponses = {
+    /**
+     * Logged in. A user who is already logged in gets `{"message": "You are already logged in."}` instead, and nothing is done.
+     */
+    200: {
+        /**
+         * Always false: two-factor authentication is not enabled.
+         */
+        two_factor: boolean;
+    };
+};
+
+export type LoginStoreResponse = LoginStoreResponses[keyof LoginStoreResponses];
+
+export type LogoutData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/logout';
+};
+
+export type LogoutErrors = {
+    /**
+     * Missing or invalid CSRF token (`X-XSRF-TOKEN` header).
+     */
+    419: {
+        /**
+         * Error overview.
+         */
+        message: string;
+    };
+};
+
+export type LogoutError = LogoutErrors[keyof LogoutErrors];
+
+export type LogoutResponses = {
+    /**
+     * Logged out.
+     */
+    204: void;
+};
+
+export type LogoutResponse = LogoutResponses[keyof LogoutResponses];
+
+export type PasswordEmailData = {
+    body: {
+        /**
+         * Email address, case-insensitive.
+         */
+        email: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/forgot-password';
+};
+
+export type PasswordEmailErrors = {
+    /**
+     * Missing or invalid CSRF token (`X-XSRF-TOKEN` header).
+     */
+    419: {
+        /**
+         * Error overview.
+         */
+        message: string;
+    };
+    /**
+     * The email is missing or malformed.
+     */
+    422: {
+        /**
+         * Summary of the errors.
+         */
+        message: string;
+        /**
+         * Error messages, keyed by field.
+         */
+        errors: {
+            [key: string]: unknown;
+        };
+    };
+    /**
+     * Too many requests; try again later.
+     */
+    429: {
+        /**
+         * Error overview.
+         */
+        message: string;
+    };
+};
+
+export type PasswordEmailError = PasswordEmailErrors[keyof PasswordEmailErrors];
+
+export type PasswordEmailResponses = {
+    /**
+     * Always returned for a well-formed email. A user who is already logged in gets `{"message": "You are already logged in."}` instead, and nothing is done.
+     */
+    200: {
+        message: string;
+    };
+};
+
+export type PasswordEmailResponse = PasswordEmailResponses[keyof PasswordEmailResponses];
+
+export type PasswordUpdateData = {
+    body: {
+        /**
+         * The `token` query parameter from the reset link.
+         */
+        token: string;
+        /**
+         * Email address, case-insensitive. The `email` query parameter from the reset link.
+         */
+        email: string;
+        /**
+         * At least 10 characters with upper- and lowercase letters and a number. In production it must also not appear in known data breaches.
+         */
+        password: string;
+        /**
+         * Must match `password`.
+         */
+        password_confirmation: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/reset-password';
+};
+
+export type PasswordUpdateErrors = {
+    /**
+     * Missing or invalid CSRF token (`X-XSRF-TOKEN` header).
+     */
+    419: {
+        /**
+         * Error overview.
+         */
+        message: string;
+    };
+    /**
+     * Invalid or expired token, or the password is too weak.
+     */
+    422: {
+        /**
+         * Summary of the errors.
+         */
+        message: string;
+        /**
+         * Error messages, keyed by field.
+         */
+        errors: {
+            [key: string]: unknown;
+        };
+    };
+};
+
+export type PasswordUpdateError = PasswordUpdateErrors[keyof PasswordUpdateErrors];
+
+export type PasswordUpdateResponses = {
+    /**
+     * Password changed; the user can log in with it. A user who is already logged in gets `{"message": "You are already logged in."}` instead, and nothing is done.
+     */
+    200: {
+        message: string;
+    };
+};
+
+export type PasswordUpdateResponse = PasswordUpdateResponses[keyof PasswordUpdateResponses];
+
+export type RegisterStoreData = {
+    body: {
+        /**
+         * Display name, up to 255 characters.
+         */
+        name: string;
+        /**
+         * Email address, case-insensitive. Must not already be registered.
+         */
+        email: string;
+        /**
+         * At least 10 characters with upper- and lowercase letters and a number. In production it must also not appear in known data breaches.
+         */
+        password: string;
+        /**
+         * Must match `password`.
+         */
+        password_confirmation: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/register';
+};
+
+export type RegisterStoreErrors = {
+    /**
+     * Missing or invalid CSRF token (`X-XSRF-TOKEN` header).
+     */
+    419: {
+        /**
+         * Error overview.
+         */
+        message: string;
+    };
+    /**
+     * Invalid input, e.g. the email is taken or the password is too weak.
+     */
+    422: {
+        /**
+         * Summary of the errors.
+         */
+        message: string;
+        /**
+         * Error messages, keyed by field.
+         */
+        errors: {
+            [key: string]: unknown;
+        };
+    };
+    /**
+     * Too many requests; try again later.
+     */
+    429: {
+        /**
+         * Error overview.
+         */
+        message: string;
+    };
+};
+
+export type RegisterStoreError = RegisterStoreErrors[keyof RegisterStoreErrors];
+
+export type RegisterStoreResponses = {
+    /**
+     * The user is already logged in; nothing was done.
+     */
+    200: {
+        message: string;
+    };
+    /**
+     * Registered and logged in. The body is empty; fetch the user from `GET /v1/me`.
+     */
+    201: unknown;
+};
+
+export type RegisterStoreResponse = RegisterStoreResponses[keyof RegisterStoreResponses];
+
+export type VerificationVerifyData = {
+    body?: never;
+    path: {
+        id: string;
+        hash: string;
+    };
+    query?: never;
+    url: '/email/verify/{id}/{hash}';
+};
+
+export type VerificationVerifyErrors = {
+    /**
+     * Not logged in.
+     */
+    401: {
+        /**
+         * Error overview.
+         */
+        message: string;
+    };
+    /**
+     * The link is invalid, expired or belongs to another user.
+     */
+    403: {
+        /**
+         * Error overview.
+         */
+        message: string;
+    };
+    /**
+     * Too many requests; try again later.
+     */
+    429: {
+        /**
+         * Error overview.
+         */
+        message: string;
+    };
+};
+
+export type VerificationVerifyError = VerificationVerifyErrors[keyof VerificationVerifyErrors];
+
+export type VerificationVerifyResponses = {
+    /**
+     * Verified, when requested with `Accept: application/json`.
+     */
+    204: void;
+};
+
+export type VerificationVerifyResponse = VerificationVerifyResponses[keyof VerificationVerifyResponses];
+
+export type VerificationSendData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/email/verification-notification';
+};
+
+export type VerificationSendErrors = {
+    /**
+     * Not logged in.
+     */
+    401: {
+        /**
+         * Error overview.
+         */
+        message: string;
+    };
+    /**
+     * Missing or invalid CSRF token (`X-XSRF-TOKEN` header).
+     */
+    419: {
+        /**
+         * Error overview.
+         */
+        message: string;
+    };
+    /**
+     * Too many requests; try again later.
+     */
+    429: {
+        /**
+         * Error overview.
+         */
+        message: string;
+    };
+};
+
+export type VerificationSendError = VerificationSendErrors[keyof VerificationSendErrors];
+
+export type VerificationSendResponses = {
+    /**
+     * Verification email sent.
+     */
+    202: unknown;
+    /**
+     * The email address is already verified; nothing was sent.
+     */
+    204: void;
+};
+
+export type VerificationSendResponse = VerificationSendResponses[keyof VerificationSendResponses];
+
+export type PasswordConfirmationData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/confirmed-password-status';
+};
+
+export type PasswordConfirmationErrors = {
+    /**
+     * Not logged in.
+     */
+    401: {
+        /**
+         * Error overview.
+         */
+        message: string;
+    };
+};
+
+export type PasswordConfirmationError = PasswordConfirmationErrors[keyof PasswordConfirmationErrors];
+
+export type PasswordConfirmationResponses = {
+    /**
+     * Confirmation status.
+     */
+    200: {
+        confirmed: boolean;
+    };
+};
+
+export type PasswordConfirmationResponse = PasswordConfirmationResponses[keyof PasswordConfirmationResponses];
+
+export type PasswordConfirmStoreData = {
+    body: {
+        /**
+         * The current password.
+         */
+        password: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/user/confirm-password';
+};
+
+export type PasswordConfirmStoreErrors = {
+    /**
+     * Not logged in.
+     */
+    401: {
+        /**
+         * Error overview.
+         */
+        message: string;
+    };
+    /**
+     * Missing or invalid CSRF token (`X-XSRF-TOKEN` header).
+     */
+    419: {
+        /**
+         * Error overview.
+         */
+        message: string;
+    };
+    /**
+     * The password is wrong.
+     */
+    422: {
+        /**
+         * Summary of the errors.
+         */
+        message: string;
+        /**
+         * Error messages, keyed by field.
+         */
+        errors: {
+            [key: string]: unknown;
+        };
+    };
+};
+
+export type PasswordConfirmStoreError = PasswordConfirmStoreErrors[keyof PasswordConfirmStoreErrors];
+
+export type PasswordConfirmStoreResponses = {
+    /**
+     * Password confirmed.
+     */
+    201: unknown;
+};
+
+export type V1MeShowData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/me';
+};
+
+export type V1MeShowErrors = {
+    /**
+     * Unauthenticated
+     */
+    401: {
+        /**
+         * Error overview.
+         */
+        message: string;
+    };
+};
+
+export type V1MeShowError = V1MeShowErrors[keyof V1MeShowErrors];
+
+export type V1MeShowResponses = {
+    /**
+     * `UserResource`
+     */
+    200: {
+        data: UserResource;
+    };
+};
+
+export type V1MeShowResponse = V1MeShowResponses[keyof V1MeShowResponses];
 
 export type V1GenresIndexData = {
     body?: never;
@@ -718,11 +1275,11 @@ export type V1ProductsIndexData = {
          */
         'os[]'?: Array<string> | null;
         /**
-         * Minimum price in cents (inclusive).
+         * Minimum price in cents (inclusive), at most 2147483647.
          */
         min_price?: number | null;
         /**
-         * Maximum price in cents (inclusive). Must not be lower than `min_price`.
+         * Maximum price in cents (inclusive), at most 2147483647. Must not be lower than `min_price`.
          */
         max_price?: number | null;
         /**

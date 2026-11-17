@@ -3,8 +3,103 @@
 import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { type Options, v1GenresIndex, v1HomeGalleriesIndex, v1MenusSidemenuIndex, v1OrdersPay, v1OrdersShow, v1OrdersStore, v1ProductsFiltersIndex, v1ProductsIndex, v1ProductsShow } from '../sdk.gen';
-import type { V1GenresIndexData, V1GenresIndexResponse, V1HomeGalleriesIndexData, V1HomeGalleriesIndexResponse, V1MenusSidemenuIndexData, V1MenusSidemenuIndexResponse, V1OrdersPayData, V1OrdersPayError, V1OrdersPayResponse, V1OrdersShowData, V1OrdersShowError, V1OrdersShowResponse, V1OrdersStoreData, V1OrdersStoreError, V1OrdersStoreResponse, V1ProductsFiltersIndexData, V1ProductsFiltersIndexResponse, V1ProductsIndexData, V1ProductsIndexError, V1ProductsIndexResponse, V1ProductsShowData, V1ProductsShowError, V1ProductsShowResponse } from '../types.gen';
+import { loginStore, logout, type Options, passwordConfirmation, passwordConfirmStore, passwordEmail, passwordUpdate, registerStore, v1GenresIndex, v1HomeGalleriesIndex, v1MenusSidemenuIndex, v1MeShow, v1OrdersPay, v1OrdersShow, v1OrdersStore, v1ProductsFiltersIndex, v1ProductsIndex, v1ProductsShow, verificationSend, verificationVerify } from '../sdk.gen';
+import type { LoginStoreData, LoginStoreError, LoginStoreResponse, LogoutData, LogoutError, LogoutResponse, PasswordConfirmationData, PasswordConfirmationError, PasswordConfirmationResponse, PasswordConfirmStoreData, PasswordConfirmStoreError, PasswordEmailData, PasswordEmailError, PasswordEmailResponse, PasswordUpdateData, PasswordUpdateError, PasswordUpdateResponse, RegisterStoreData, RegisterStoreError, RegisterStoreResponse, V1GenresIndexData, V1GenresIndexResponse, V1HomeGalleriesIndexData, V1HomeGalleriesIndexResponse, V1MenusSidemenuIndexData, V1MenusSidemenuIndexResponse, V1MeShowData, V1MeShowError, V1MeShowResponse, V1OrdersPayData, V1OrdersPayError, V1OrdersPayResponse, V1OrdersShowData, V1OrdersShowError, V1OrdersShowResponse, V1OrdersStoreData, V1OrdersStoreError, V1OrdersStoreResponse, V1ProductsFiltersIndexData, V1ProductsFiltersIndexResponse, V1ProductsIndexData, V1ProductsIndexError, V1ProductsIndexResponse, V1ProductsShowData, V1ProductsShowError, V1ProductsShowResponse, VerificationSendData, VerificationSendError, VerificationSendResponse, VerificationVerifyData, VerificationVerifyError, VerificationVerifyResponse } from '../types.gen';
+
+/**
+ * Log in
+ *
+ * Starts a session for the storefront. Limited to 5 attempts per minute per email and IP, and 10 per minute per email. Browser clients must first call `GET /sanctum/csrf-cookie` and send the `X-XSRF-TOKEN` header.
+ */
+export const loginStoreMutation = (options?: Partial<Options<LoginStoreData>>): UseMutationOptions<LoginStoreResponse, LoginStoreError, Options<LoginStoreData>> => {
+    const mutationOptions: UseMutationOptions<LoginStoreResponse, LoginStoreError, Options<LoginStoreData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await loginStore({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Log out
+ *
+ * Ends the session. Browser clients must first call `GET /sanctum/csrf-cookie` and send the `X-XSRF-TOKEN` header.
+ */
+export const logoutMutation = (options?: Partial<Options<LogoutData>>): UseMutationOptions<LogoutResponse, LogoutError, Options<LogoutData>> => {
+    const mutationOptions: UseMutationOptions<LogoutResponse, LogoutError, Options<LogoutData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await logout({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Request a password reset link
+ *
+ * Emails a link to `{FRONTEND_URL}/reset-password?token=…&email=…`. The response is the same whether or not the email is registered. Limited to 5 per minute per IP and 3 per minute per email. Browser clients must first call `GET /sanctum/csrf-cookie` and send the `X-XSRF-TOKEN` header.
+ */
+export const passwordEmailMutation = (options?: Partial<Options<PasswordEmailData>>): UseMutationOptions<PasswordEmailResponse, PasswordEmailError, Options<PasswordEmailData>> => {
+    const mutationOptions: UseMutationOptions<PasswordEmailResponse, PasswordEmailError, Options<PasswordEmailData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await passwordEmail({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Reset password
+ *
+ * Sets a new password using the `token` and `email` from the reset link. Browser clients must first call `GET /sanctum/csrf-cookie` and send the `X-XSRF-TOKEN` header.
+ */
+export const passwordUpdateMutation = (options?: Partial<Options<PasswordUpdateData>>): UseMutationOptions<PasswordUpdateResponse, PasswordUpdateError, Options<PasswordUpdateData>> => {
+    const mutationOptions: UseMutationOptions<PasswordUpdateResponse, PasswordUpdateError, Options<PasswordUpdateData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await passwordUpdate({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Register
+ *
+ * Creates an account, signs the user in and emails them a verification link. Limited to 5 per minute per IP. Browser clients must first call `GET /sanctum/csrf-cookie` and send the `X-XSRF-TOKEN` header.
+ */
+export const registerStoreMutation = (options?: Partial<Options<RegisterStoreData>>): UseMutationOptions<RegisterStoreResponse, RegisterStoreError, Options<RegisterStoreData>> => {
+    const mutationOptions: UseMutationOptions<RegisterStoreResponse, RegisterStoreError, Options<RegisterStoreData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await registerStore({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -38,6 +133,104 @@ const createQueryKey = <TOptions extends Options>(id: string, options?: TOptions
     }
     return [params];
 };
+
+export const verificationVerifyQueryKey = (options: Options<VerificationVerifyData>) => createQueryKey('verificationVerify', options);
+
+/**
+ * Verify email address
+ *
+ * The signed link from the verification email; open it in the browser where the user is logged in. It redirects to `{FRONTEND_URL}?verified=1`. Limited to 6 per minute.
+ */
+export const verificationVerifyOptions = (options: Options<VerificationVerifyData>) => queryOptions<VerificationVerifyResponse, VerificationVerifyError, VerificationVerifyResponse, ReturnType<typeof verificationVerifyQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await verificationVerify({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: verificationVerifyQueryKey(options)
+});
+
+/**
+ * Resend the verification email
+ *
+ * Emails a new verification link to the signed-in user. Limited to 6 per minute. Browser clients must first call `GET /sanctum/csrf-cookie` and send the `X-XSRF-TOKEN` header.
+ */
+export const verificationSendMutation = (options?: Partial<Options<VerificationSendData>>): UseMutationOptions<VerificationSendResponse, VerificationSendError, Options<VerificationSendData>> => {
+    const mutationOptions: UseMutationOptions<VerificationSendResponse, VerificationSendError, Options<VerificationSendData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await verificationSend({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const passwordConfirmationQueryKey = (options?: Options<PasswordConfirmationData>) => createQueryKey('passwordConfirmation', options);
+
+/**
+ * Password confirmation status
+ *
+ * Whether the signed-in user has confirmed their password recently.
+ */
+export const passwordConfirmationOptions = (options?: Options<PasswordConfirmationData>) => queryOptions<PasswordConfirmationResponse, PasswordConfirmationError, PasswordConfirmationResponse, ReturnType<typeof passwordConfirmationQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await passwordConfirmation({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: passwordConfirmationQueryKey(options)
+});
+
+/**
+ * Confirm password
+ *
+ * Re-checks the signed-in user's password before a sensitive action. Browser clients must first call `GET /sanctum/csrf-cookie` and send the `X-XSRF-TOKEN` header.
+ */
+export const passwordConfirmStoreMutation = (options?: Partial<Options<PasswordConfirmStoreData>>): UseMutationOptions<unknown, PasswordConfirmStoreError, Options<PasswordConfirmStoreData>> => {
+    const mutationOptions: UseMutationOptions<unknown, PasswordConfirmStoreError, Options<PasswordConfirmStoreData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await passwordConfirmStore({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const v1MeShowQueryKey = (options?: Options<V1MeShowData>) => createQueryKey('v1MeShow', options);
+
+/**
+ * Display the signed-in user
+ *
+ * Works with Sanctum's session cookie (after `POST /api/login`) or a Sanctum bearer token. Returns 401 when not signed in.
+ */
+export const v1MeShowOptions = (options?: Options<V1MeShowData>) => queryOptions<V1MeShowResponse, V1MeShowError, V1MeShowResponse, ReturnType<typeof v1MeShowQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await v1MeShow({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: v1MeShowQueryKey(options)
+});
 
 export const v1GenresIndexQueryKey = (options?: Options<V1GenresIndexData>) => createQueryKey('v1GenresIndex', options);
 
@@ -124,6 +317,7 @@ export const v1OrdersShowOptions = (options: Options<V1OrdersShowData>) => query
  *
  * Takes a mock payment that always succeeds. Paying an already paid order returns it unchanged, so retries are safe.
  * Returns 409 when the order cannot be paid, e.g. because it was cancelled. Limited to 10 requests per minute per client.
+ * Not available in production, where it returns 404.
  */
 export const v1OrdersPayMutation = (options?: Partial<Options<V1OrdersPayData>>): UseMutationOptions<V1OrdersPayResponse, V1OrdersPayError, Options<V1OrdersPayData>> => {
     const mutationOptions: UseMutationOptions<V1OrdersPayResponse, V1OrdersPayError, Options<V1OrdersPayData>> = {
